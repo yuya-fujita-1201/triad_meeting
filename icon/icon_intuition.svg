@@ -1,0 +1,8 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Lightning Bolt -->
+  <path d="M26 4L14 24H22L18 44L34 20H26L26 4Z" stroke="#FFB800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Sparkle/Star -->
+  <path d="M38 10L39 13L42 14L39 15L38 18L37 15L34 14L37 13L38 10Z" stroke="#FFB800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M40 8L40 10M40 16L40 18M36 12L38 12M42 12L44 12" stroke="#FFB800" stroke-width="2" stroke-linecap="round"/>
+</svg>
