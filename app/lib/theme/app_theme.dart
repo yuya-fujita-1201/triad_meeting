@@ -35,7 +35,7 @@ class AppTheme {
         foregroundColor: AppColors.textPrimary,
         centerTitle: false,
       ),
-      cardTheme: const CardTheme(
+      cardTheme: const CardThemeData(
         color: AppColors.card,
         elevation: 0,
         margin: EdgeInsets.zero,

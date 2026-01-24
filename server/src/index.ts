@@ -62,34 +62,47 @@ router.post('/deliberate', async (req: AuthenticatedRequest, res) => {
     }
 
     const draft = await generateDeliberation(body.consultation);
+    type DraftRound = (typeof draft.rounds)[number];
     const safeRounds = Array.isArray(draft.rounds) ? draft.rounds : [];
-    const safeResolution = draft.resolution ?? {
-      votes: { logic: 'pending', heart: 'pending', flash: 'pending' },
-      reasoning: [],
-      nextSteps: [],
-      reviewDate: '',
-      risks: [],
+    const safeResolution: Partial<typeof draft.resolution> = draft.resolution ?? {};
+
+    const fallbackMessages = {
+      logic: '事実と選択肢を整理し、判断材料を比較しましょう。',
+      heart: '自分の気持ちと周囲の影響を丁寧に見つめましょう。',
+      flash: '迷ったら試せる小さな一歩を先に踏み出しましょう。',
     };
 
     const baseTime = Date.now();
-    const rounds = safeRounds.map((round, roundIndex) => {
-      const roundNumber = roundIndex + 1;
+    const rounds = Array.from({ length: 3 }).map((_, roundIndex) => {
+      const round = (safeRounds[roundIndex] ?? {}) as Partial<DraftRound>;
+      const logic =
+        typeof round.logic === 'string' && round.logic.trim().length > 0
+          ? round.logic
+          : fallbackMessages.logic;
+      const heart =
+        typeof round.heart === 'string' && round.heart.trim().length > 0
+          ? round.heart
+          : fallbackMessages.heart;
+      const flash =
+        typeof round.flash === 'string' && round.flash.trim().length > 0
+          ? round.flash
+          : fallbackMessages.flash;
       return {
-        roundNumber,
+        roundNumber: roundIndex + 1,
         messages: [
           {
             ai: 'logic',
-            message: round.logic,
+            message: logic,
             timestamp: new Date(baseTime + roundIndex * 3000 + 0).toISOString(),
           },
           {
             ai: 'heart',
-            message: round.heart,
+            message: heart,
             timestamp: new Date(baseTime + roundIndex * 3000 + 1000).toISOString(),
           },
           {
             ai: 'flash',
-            message: round.flash,
+            message: flash,
             timestamp: new Date(baseTime + roundIndex * 3000 + 2000).toISOString(),
           },
         ],
@@ -100,10 +113,14 @@ router.post('/deliberate', async (req: AuthenticatedRequest, res) => {
       vote === 'approve' || vote === 'reject' || vote === 'pending'
         ? vote
         : 'pending';
+    const votesRaw =
+      typeof safeResolution.votes === 'object' && safeResolution.votes
+        ? (safeResolution.votes as Partial<typeof draft.resolution.votes>)
+        : {};
     const votes = {
-      logic: sanitizeVote(safeResolution.votes.logic),
-      heart: sanitizeVote(safeResolution.votes.heart),
-      flash: sanitizeVote(safeResolution.votes.flash),
+      logic: sanitizeVote(votesRaw.logic),
+      heart: sanitizeVote(votesRaw.heart),
+      flash: sanitizeVote(votesRaw.flash),
     };
     const approveCount = Object.values(votes).filter(
       (vote) => vote === 'approve',
@@ -178,8 +195,13 @@ router.get('/history', async (req: AuthenticatedRequest, res) => {
       return res.status(400).json({ error: 'Missing userId' });
     }
 
-    const limit = Math.min(Number(req.query.limit ?? 10), 50);
-    const offset = Number(req.query.offset ?? 0);
+    const rawLimit = Number(req.query.limit ?? 10);
+    const rawOffset = Number(req.query.offset ?? 0);
+    const limit = Math.min(
+      Math.max(Number.isFinite(rawLimit) ? rawLimit : 10, 1),
+      50,
+    );
+    const offset = Math.max(Number.isFinite(rawOffset) ? rawOffset : 0, 0);
 
     const snapshot = await firestore
       .collection('users')

@@ -17,25 +17,35 @@ import 'theme/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  var firebaseReady = false;
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    firebaseReady = true;
+  } catch (_) {
+    firebaseReady = false;
+  }
 
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
+  if (firebaseReady) {
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
 
   await MobileAds.instance.initialize();
 
   final localStorage = LocalStorageService();
   await localStorage.init();
 
-  try {
-    await FirebaseAuth.instance.signInAnonymously();
-  } catch (_) {
-    // Firebase settings may be missing in early setup; continue with limited mode.
+  if (firebaseReady) {
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+    } catch (_) {
+      // Firebase settings may be missing in early setup; continue with limited mode.
+    }
   }
 
   runApp(

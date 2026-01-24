@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import '../config/app_config.dart';
 import '../models/consultation.dart';
@@ -16,7 +17,7 @@ class ApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final user = FirebaseAuth.instance.currentUser;
+          final user = _currentUser();
           if (user != null) {
             final token = await user.getIdToken();
             options.headers['Authorization'] = 'Bearer $token';
@@ -29,13 +30,18 @@ class ApiService {
 
   final Dio _dio;
 
+  User? _currentUser() {
+    if (Firebase.apps.isEmpty) return null;
+    return FirebaseAuth.instance.currentUser;
+  }
+
   Future<Consultation> deliberate(String consultation) async {
     try {
       final data = <String, dynamic>{
         'consultation': consultation,
         'plan': 'free',
       };
-      final userId = FirebaseAuth.instance.currentUser?.uid;
+      final userId = _currentUser()?.uid;
       if (userId != null) {
         data['userId'] = userId;
       }
@@ -43,9 +49,9 @@ class ApiService {
         '/deliberate',
         data: data,
       );
-      final data = response.data ?? {};
+      final responseData = response.data ?? {};
       return Consultation.fromJson({
-        ...data,
+        ...responseData,
         'question': consultation,
       });
     } on DioException catch (error) {
@@ -70,7 +76,7 @@ class ApiService {
         'limit': limit,
         'offset': offset,
       };
-      final userId = FirebaseAuth.instance.currentUser?.uid;
+      final userId = _currentUser()?.uid;
       if (userId != null) {
         params['userId'] = userId;
       }
@@ -79,7 +85,9 @@ class ApiService {
         queryParameters: params,
       );
       final data = response.data ?? {};
-      final items = data['items'] as List<dynamic>? ?? [];
+      final items = (data['items'] as List<dynamic>?) ??
+          (data['consultations'] as List<dynamic>?) ??
+          [];
       return items
           .map((item) => Consultation.fromJson(item as Map<String, dynamic>))
           .toList();
@@ -93,7 +101,7 @@ class ApiService {
 
   Future<Consultation> fetchConsultation(String id) async {
     final params = <String, dynamic>{};
-    final userId = FirebaseAuth.instance.currentUser?.uid;
+    final userId = _currentUser()?.uid;
     if (userId != null) {
       params['userId'] = userId;
     }
@@ -106,7 +114,7 @@ class ApiService {
 
   Future<void> saveConsultation(Consultation consultation) async {
     final data = <String, dynamic>{'consultation': consultation.toJson()};
-    final userId = FirebaseAuth.instance.currentUser?.uid;
+    final userId = _currentUser()?.uid;
     if (userId != null) {
       data['userId'] = userId;
     }
@@ -118,7 +126,7 @@ class ApiService {
 
   Future<void> deleteConsultation(String id) async {
     final params = <String, dynamic>{};
-    final userId = FirebaseAuth.instance.currentUser?.uid;
+    final userId = _currentUser()?.uid;
     if (userId != null) {
       params['userId'] = userId;
     }

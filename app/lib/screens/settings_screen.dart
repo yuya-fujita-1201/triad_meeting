@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/consultation.dart';
 import '../providers/history_controller.dart';
 import '../providers/providers.dart';
 import '../widgets/constrained_scaffold.dart';
@@ -32,18 +34,42 @@ class SettingsScreen extends ConsumerWidget {
 
     if (!confirmed) return;
 
-    final history = ref.read(historyControllerProvider).value ?? [];
     final api = ref.read(apiServiceProvider);
     final local = ref.read(localStorageProvider);
 
-    for (final item in history) {
-      await api.deleteConsultation(item.consultationId);
+    if (Firebase.apps.isNotEmpty) {
+      const pageSize = 50;
+      var offset = 0;
+      while (true) {
+        List<Consultation> page;
+        try {
+          page = await api.fetchHistory(limit: pageSize, offset: offset);
+        } catch (_) {
+          page = ref.read(historyControllerProvider).value ?? [];
+        }
+        if (page.isEmpty) break;
+        for (final item in page) {
+          try {
+            await api.deleteConsultation(item.consultationId);
+          } catch (_) {
+            // Ignore deletion failures per-item.
+          }
+        }
+        if (page.length < pageSize) break;
+        offset += pageSize;
+      }
     }
     await local.clearAll();
 
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      await user.delete();
+    if (Firebase.apps.isNotEmpty) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        try {
+          await user.delete();
+        } catch (_) {
+          // Ignore if account deletion is not permitted in current auth state.
+        }
+      }
     }
 
     if (context.mounted) {
@@ -55,7 +81,8 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = FirebaseAuth.instance.currentUser;
+    final user =
+        Firebase.apps.isNotEmpty ? FirebaseAuth.instance.currentUser : null;
 
     return ConstrainedScaffold(
       title: '設定',

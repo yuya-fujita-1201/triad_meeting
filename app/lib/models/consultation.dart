@@ -16,13 +16,18 @@ class Consultation {
   });
 
   factory Consultation.fromJson(Map<String, dynamic> json) {
+    final consultationIdRaw = json['consultationId'] ?? json['id'] ?? '';
+    final consultationId = consultationIdRaw.toString();
+    final resolutionJson = json['resolution'];
     return Consultation(
-      consultationId: json['consultationId'] as String,
+      consultationId: consultationId,
       question: json['question'] as String? ?? json['consultation'] as String? ?? '',
       rounds: (json['rounds'] as List<dynamic>? ?? [])
           .map((item) => DeliberationRound.fromJson(item as Map<String, dynamic>))
           .toList(),
-      resolution: Resolution.fromJson(json['resolution'] as Map<String, dynamic>),
+      resolution: Resolution.fromJson(
+        resolutionJson is Map<String, dynamic> ? resolutionJson : null,
+      ),
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime.now(),
     );
@@ -56,7 +61,9 @@ class DeliberationRound {
 
   factory DeliberationRound.fromJson(Map<String, dynamic> json) {
     return DeliberationRound(
-      roundNumber: json['roundNumber'] as int,
+      roundNumber: json['roundNumber'] is int
+          ? json['roundNumber'] as int
+          : int.tryParse(json['roundNumber']?.toString() ?? '') ?? 1,
       messages: (json['messages'] as List<dynamic>? ?? [])
           .map((item) => AiMessage.fromJson(item as Map<String, dynamic>))
           .toList(),
@@ -117,7 +124,19 @@ class Resolution {
     required this.risks,
   });
 
-  factory Resolution.fromJson(Map<String, dynamic> json) {
+  factory Resolution.empty() => Resolution(
+        decision: '',
+        votes: const {},
+        reasoning: const [],
+        nextSteps: const [],
+        reviewDate: '',
+        risks: const [],
+      );
+
+  factory Resolution.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return Resolution.empty();
+    }
     final votesRaw = json['votes'] as Map<String, dynamic>? ?? {};
     return Resolution(
       decision: json['decision'] as String? ?? '',
