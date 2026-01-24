@@ -1,0 +1,15 @@
+.DS_Store
+.worktrees/
+server/node_modules/
+server/dist/
+app/.dart_tool/
+app/build/
+app/ios/Pods/
+app/ios/.symlinks/
+app/macos/Pods/
+app/macos/.symlinks/
+app/android/.gradle/
+app/android/.idea/
+app/android/local.properties
+app/**/.flutter-plugins
+app/**/.flutter-plugins-dependencies
