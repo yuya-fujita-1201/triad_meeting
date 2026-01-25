@@ -6,46 +6,55 @@ class AiCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.color,
-    required this.icon,
+    this.icon,
+    this.imagePath,
   });
 
   final String title;
   final String description;
   final Color color;
-  final IconData icon;
+  final IconData? icon;
+  final String? imagePath;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 64,
+              height: 64,
               decoration: BoxDecoration(
                 color: color.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(icon, color: color),
+              child: imagePath != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.asset(
+                        imagePath!,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Icon(icon, color: color, size: 32),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: color,
               ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              description,
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
             ),
           ],
         ),

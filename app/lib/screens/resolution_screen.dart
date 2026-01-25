@@ -69,11 +69,11 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
   String _labelForAi(String ai) {
     switch (ai) {
       case 'logic':
-        return 'ロジック';
+        return '論理';
       case 'heart':
-        return 'ハート';
+        return '共感';
       case 'flash':
-        return 'フラッシュ';
+        return '直感';
       default:
         return ai;
     }
@@ -103,9 +103,9 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
                   const SizedBox(height: 12),
                   _SectionTitle(title: '投票'),
                   const SizedBox(height: 8),
-                  _VoteRow(label: 'ロジック', value: resolution.votes['logic']),
-                  _VoteRow(label: 'ハート', value: resolution.votes['heart']),
-                  _VoteRow(label: 'フラッシュ', value: resolution.votes['flash']),
+                  _VoteRow(label: '論理', value: resolution.votes['logic']),
+                  _VoteRow(label: '共感', value: resolution.votes['heart']),
+                  _VoteRow(label: '直感', value: resolution.votes['flash']),
                   const SizedBox(height: 12),
                   _SectionTitle(title: '理由'),
                   const SizedBox(height: 8),
