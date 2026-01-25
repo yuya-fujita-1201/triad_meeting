@@ -7,7 +7,7 @@ import winston from 'winston';
 
 import { verifyFirebaseToken, AuthenticatedRequest } from './middleware/auth';
 import { firestore, admin } from './services/firebase';
-import { generateDeliberation } from './services/openai';
+import { generateDeliberation, QuestionType, VoteValue } from './services/openai';
 import { checkAndIncrementDailyUsage, DailyLimitError } from './services/usage';
 import { getJstResetAt } from './utils/time';
 
@@ -38,6 +38,34 @@ const deliberateSchema = z.object({
   plan: z.string().optional(),
 });
 
+// 有効な投票値のセット
+const validVotes: VoteValue[] = [
+  'approve', 'reject', 'pending',           // yesno型
+  'A', 'B', 'both', 'depends',              // choice型
+  'strongly_recommend', 'recommend', 'conditional',  // open型
+];
+
+// 質問タイプに応じたデフォルト投票値
+const defaultVoteForType = (questionType: QuestionType): VoteValue => {
+  switch (questionType) {
+    case 'yesno':
+      return 'pending';
+    case 'choice':
+      return 'depends';
+    case 'open':
+    default:
+      return 'recommend';
+  }
+};
+
+// 投票値のサニタイズ
+const sanitizeVote = (vote: string | undefined, questionType: QuestionType): VoteValue => {
+  if (vote && validVotes.includes(vote as VoteValue)) {
+    return vote as VoteValue;
+  }
+  return defaultVoteForType(questionType);
+};
+
 router.post('/deliberate', async (req: AuthenticatedRequest, res) => {
   try {
     const body = deliberateSchema.parse(req.body);
@@ -65,6 +93,20 @@ router.post('/deliberate', async (req: AuthenticatedRequest, res) => {
     type DraftRound = (typeof draft.rounds)[number];
     const safeRounds = Array.isArray(draft.rounds) ? draft.rounds : [];
     const safeResolution: Partial<typeof draft.resolution> = draft.resolution ?? {};
+
+    // 質問タイプの取得（デフォルトはopen）
+    const questionType: QuestionType = 
+      draft.questionType === 'yesno' || draft.questionType === 'choice' || draft.questionType === 'open'
+        ? draft.questionType
+        : 'open';
+
+    // 選択肢の取得（choice型の場合）
+    const options = questionType === 'choice' && draft.options
+      ? {
+          A: typeof draft.options.A === 'string' ? draft.options.A : '選択肢A',
+          B: typeof draft.options.B === 'string' ? draft.options.B : '選択肢B',
+        }
+      : undefined;
 
     const fallbackMessages = {
       logic: '事実と選択肢を整理し、判断材料を比較しましょう。',
@@ -109,32 +151,23 @@ router.post('/deliberate', async (req: AuthenticatedRequest, res) => {
       };
     });
 
-    const sanitizeVote = (vote: string | undefined) =>
-      vote === 'approve' || vote === 'reject' || vote === 'pending'
-        ? vote
-        : 'pending';
     const votesRaw =
       typeof safeResolution.votes === 'object' && safeResolution.votes
-        ? (safeResolution.votes as Partial<typeof draft.resolution.votes>)
+        ? (safeResolution.votes as Record<string, string | undefined>)
         : {};
+    
     const votes = {
-      logic: sanitizeVote(votesRaw.logic),
-      heart: sanitizeVote(votesRaw.heart),
-      flash: sanitizeVote(votesRaw.flash),
+      logic: sanitizeVote(votesRaw.logic, questionType),
+      heart: sanitizeVote(votesRaw.heart, questionType),
+      flash: sanitizeVote(votesRaw.flash, questionType),
     };
-    const approveCount = Object.values(votes).filter(
-      (vote) => vote === 'approve',
-    ).length;
-    const decision =
-      approveCount === 3
-        ? '強く推奨'
-        : approveCount === 2
-            ? '推奨'
-            : approveCount === 1
-                ? '条件付き推奨'
-                : '推奨しない';
 
-    const reviewDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(
+    // 決議文（APIから取得、なければデフォルト生成）
+    const decision = typeof safeResolution.decision === 'string' && safeResolution.decision.trim().length > 0
+      ? safeResolution.decision
+      : generateDefaultDecision(questionType, votes, options);
+
+    const reviewDate = /^\d{4}-\d{2}-\d{2}$/.test(
       safeResolution.reviewDate ?? '',
     )
       ? safeResolution.reviewDate
@@ -143,6 +176,8 @@ router.post('/deliberate', async (req: AuthenticatedRequest, res) => {
           .slice(0, 10);
 
     const resolution = {
+      questionType,
+      options,
       decision,
       votes,
       reasoning: Array.isArray(safeResolution.reasoning)
@@ -187,6 +222,37 @@ router.post('/deliberate', async (req: AuthenticatedRequest, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// デフォルトの決議文を生成
+function generateDefaultDecision(
+  questionType: QuestionType,
+  votes: Record<string, VoteValue>,
+  options?: { A: string; B: string },
+): string {
+  const voteValues = Object.values(votes);
+  
+  switch (questionType) {
+    case 'yesno': {
+      const approveCount = voteValues.filter(v => v === 'approve').length;
+      if (approveCount >= 2) return '実行することを推奨します。';
+      if (approveCount === 1) return '条件付きで検討を推奨します。';
+      return '現時点では推奨しません。';
+    }
+    case 'choice': {
+      const aCount = voteValues.filter(v => v === 'A').length;
+      const bCount = voteValues.filter(v => v === 'B').length;
+      if (aCount > bCount) return `${options?.A ?? '選択肢A'}を推奨します。`;
+      if (bCount > aCount) return `${options?.B ?? '選択肢B'}を推奨します。`;
+      return '状況に応じて判断することを推奨します。';
+    }
+    case 'open':
+    default: {
+      const strongCount = voteValues.filter(v => v === 'strongly_recommend').length;
+      if (strongCount >= 2) return '提案内容を強く推奨します。';
+      return '提案内容の実行を推奨します。';
+    }
+  }
+}
 
 router.get('/history', async (req: AuthenticatedRequest, res) => {
   try {

@@ -52,9 +52,9 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
   String _buildShareText(Consultation consultation) {
     final resolution = consultation.resolution;
     final votes = [
-      '${Sage.logic.displayName}: ${_voteLabel(resolution.votes['logic'])}',
-      '${Sage.empathy.displayName}: ${_voteLabel(resolution.votes['heart'])}',
-      '${Sage.intuition.displayName}: ${_voteLabel(resolution.votes['flash'])}',
+      '${Sage.logic.displayName}: ${resolution.getVoteDisplayText(resolution.votes['logic'] ?? '')}',
+      '${Sage.empathy.displayName}: ${resolution.getVoteDisplayText(resolution.votes['heart'] ?? '')}',
+      '${Sage.intuition.displayName}: ${resolution.getVoteDisplayText(resolution.votes['flash'] ?? '')}',
     ].join('\n');
     final reasoning = resolution.reasoning.join(' / ');
     final nextSteps = resolution.nextSteps.join(' / ');
@@ -118,14 +118,17 @@ $votes
                       _VoteCard(
                         sage: Sage.logic,
                         vote: resolution.votes['logic'],
+                        resolution: resolution,
                       ),
                       _VoteCard(
                         sage: Sage.empathy,
                         vote: resolution.votes['heart'],
+                        resolution: resolution,
                       ),
                       _VoteCard(
                         sage: Sage.intuition,
                         vote: resolution.votes['flash'],
+                        resolution: resolution,
                       ),
                     ],
                   ),
@@ -240,16 +243,18 @@ class _BulletList extends StatelessWidget {
 class _VoteCard extends StatelessWidget {
   const _VoteCard({
     required this.sage,
+    required this.resolution,
     this.vote,
   });
 
   final Sage sage;
+  final Resolution resolution;
   final String? vote;
 
   @override
   Widget build(BuildContext context) {
-    final voteText = _voteLabel(vote);
-    final voteColor = _voteColor(vote);
+    final voteText = resolution.getVoteDisplayText(vote ?? '');
+    final voteColor = _getVoteColor(vote, resolution.questionType, resolution.options);
 
     return Column(
       children: [
@@ -271,7 +276,8 @@ class _VoteCard extends StatelessWidget {
         const SizedBox(height: 4),
         // 投票結果バッジ
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          constraints: const BoxConstraints(maxWidth: 90),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
             color: voteColor,
             borderRadius: BorderRadius.circular(12),
@@ -281,8 +287,10 @@ class _VoteCard extends StatelessWidget {
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
-              fontSize: 12,
+              fontSize: 11,
             ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -290,27 +298,45 @@ class _VoteCard extends StatelessWidget {
   }
 }
 
-String _voteLabel(String? value) {
-  switch (value) {
-    case 'approve':
-      return '賛成';
-    case 'reject':
-      return '反対';
-    case 'pending':
-      return '保留';
-    default:
-      return '保留';
-  }
-}
-
-Color _voteColor(String? value) {
-  switch (value) {
-    case 'approve':
-      return AppColors.logic; // 青
-    case 'reject':
-      return AppColors.heart; // ピンク
-    case 'pending':
-    default:
-      return AppColors.flash; // 黄
+/// 質問タイプに応じた投票バッジの色を決定
+Color _getVoteColor(String? vote, QuestionType questionType, VoteOptions? options) {
+  switch (questionType) {
+    case QuestionType.yesno:
+      // Yes/No型: 賛成=青, 反対=ピンク, 保留=黄
+      switch (vote) {
+        case 'approve':
+          return AppColors.logic;
+        case 'reject':
+          return AppColors.heart;
+        case 'pending':
+        default:
+          return AppColors.flash;
+      }
+    
+    case QuestionType.choice:
+      // 選択肢型: A=青, B=ピンク, どちらも=緑, 状況次第=黄
+      switch (vote) {
+        case 'A':
+          return AppColors.logic;
+        case 'B':
+          return AppColors.heart;
+        case 'both':
+          return const Color(0xFF4CAF50); // 緑
+        case 'depends':
+        default:
+          return AppColors.flash;
+      }
+    
+    case QuestionType.open:
+      // オープン型: 強く推奨=青, 推奨=緑, 条件付き=黄
+      switch (vote) {
+        case 'strongly_recommend':
+          return AppColors.logic;
+        case 'recommend':
+          return const Color(0xFF4CAF50); // 緑
+        case 'conditional':
+        default:
+          return AppColors.flash;
+      }
   }
 }
