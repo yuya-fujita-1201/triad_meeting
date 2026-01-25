@@ -1,5 +1,52 @@
 import 'dart:convert';
 
+/// 質問タイプ
+enum QuestionType {
+  yesno,   // 「〜すべきか？」賛成/反対で答えられる
+  choice,  // 「AとBどちらがいい？」選択肢がある
+  open;    // 「どうすればいい？」オープンな質問
+
+  static QuestionType fromString(String? value) {
+    switch (value) {
+      case 'yesno':
+        return QuestionType.yesno;
+      case 'choice':
+        return QuestionType.choice;
+      case 'open':
+      default:
+        return QuestionType.open;
+    }
+  }
+
+  String toJson() => name;
+}
+
+/// 選択肢（choice型の場合）
+class VoteOptions {
+  final String optionA;
+  final String optionB;
+
+  VoteOptions({
+    required this.optionA,
+    required this.optionB,
+  });
+
+  factory VoteOptions.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return VoteOptions(optionA: '選択肢A', optionB: '選択肢B');
+    }
+    return VoteOptions(
+      optionA: json['A'] as String? ?? '選択肢A',
+      optionB: json['B'] as String? ?? '選択肢B',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'A': optionA,
+    'B': optionB,
+  };
+}
+
 class Consultation {
   final String consultationId;
   final String question;
@@ -108,6 +155,8 @@ class AiMessage {
 }
 
 class Resolution {
+  final QuestionType questionType;
+  final VoteOptions? options;
   final String decision;
   final Map<String, String> votes;
   final List<String> reasoning;
@@ -116,6 +165,8 @@ class Resolution {
   final List<String> risks;
 
   Resolution({
+    required this.questionType,
+    this.options,
     required this.decision,
     required this.votes,
     required this.reasoning,
@@ -125,6 +176,8 @@ class Resolution {
   });
 
   factory Resolution.empty() => Resolution(
+        questionType: QuestionType.open,
+        options: null,
         decision: '',
         votes: const {},
         reasoning: const [],
@@ -138,7 +191,14 @@ class Resolution {
       return Resolution.empty();
     }
     final votesRaw = json['votes'] as Map<String, dynamic>? ?? {};
+    final questionType = QuestionType.fromString(json['questionType'] as String?);
+    final optionsJson = json['options'] as Map<String, dynamic>?;
+    
     return Resolution(
+      questionType: questionType,
+      options: questionType == QuestionType.choice 
+          ? VoteOptions.fromJson(optionsJson)
+          : null,
       decision: json['decision'] as String? ?? '',
       votes: votesRaw.map((key, value) => MapEntry(key, value.toString())),
       reasoning: (json['reasoning'] as List<dynamic>? ?? [])
@@ -156,6 +216,8 @@ class Resolution {
 
   Map<String, dynamic> toJson() {
     return {
+      'questionType': questionType.toJson(),
+      if (options != null) 'options': options!.toJson(),
       'decision': decision,
       'votes': votes,
       'reasoning': reasoning,
@@ -163,5 +225,43 @@ class Resolution {
       'reviewDate': reviewDate,
       'risks': risks,
     };
+  }
+
+  /// 投票値を表示用テキストに変換
+  String getVoteDisplayText(String vote) {
+    switch (questionType) {
+      case QuestionType.yesno:
+        switch (vote) {
+          case 'approve':
+            return '賛成';
+          case 'reject':
+            return '反対';
+          case 'pending':
+          default:
+            return '保留';
+        }
+      case QuestionType.choice:
+        switch (vote) {
+          case 'A':
+            return options?.optionA ?? 'A';
+          case 'B':
+            return options?.optionB ?? 'B';
+          case 'both':
+            return 'どちらも';
+          case 'depends':
+          default:
+            return '状況次第';
+        }
+      case QuestionType.open:
+        switch (vote) {
+          case 'strongly_recommend':
+            return '強く推奨';
+          case 'recommend':
+            return '推奨';
+          case 'conditional':
+          default:
+            return '条件付き';
+        }
+    }
   }
 }
