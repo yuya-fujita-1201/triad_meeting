@@ -81,7 +81,7 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
         _loading = false;
         _errorMessage = resetAt == null
             ? error.message
-            : '${error.message}\\nリセット: $resetAt';
+            : '${error.message}\nリセット: $resetAt';
       });
     } catch (_) {
       if (!mounted) return;
@@ -152,17 +152,34 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
               ? _ErrorView(message: _errorMessage!, onRetry: _loadConsultation)
               : Column(
                   children: [
-                    // ラウンド表示
+                    // ラウンド表示（羊皮紙風）
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        'ラウンド $_currentRound / 3',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.backgroundDark,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.cardBorder),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.auto_stories,
+                            size: 18,
+                            color: AppColors.secondary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'ラウンド $_currentRound / 3',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  letterSpacing: 1.0,
+                                ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 8),
                     Expanded(
                       child: ListView.builder(
                         controller: _scrollController,
@@ -177,7 +194,7 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
                     if (_complete && _consultation != null)
                       SizedBox(
                         width: double.infinity,
-                        child: ElevatedButton(
+                        child: ElevatedButton.icon(
                           onPressed: () {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
@@ -188,16 +205,40 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
                               ),
                             );
                           },
-                          child: const Text('決議を確認する'),
+                          icon: Icon(
+                            Icons.description,
+                            color: AppColors.goldLight,
+                          ),
+                          label: Text(
+                            '決議を確認する',
+                            style: TextStyle(color: AppColors.goldLight),
+                          ),
                         ),
                       )
                     else
-                      Text(
-                        '審議中...',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: AppColors.textSecondary),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.secondary,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            '審議中...',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                          ),
+                        ],
                       ),
                   ],
                 ),
@@ -217,6 +258,7 @@ class _TimelineItem {
   final String message;
 }
 
+/// 手紙風のメッセージバブル
 class _MessageBubble extends StatelessWidget {
   const _MessageBubble({required this.item});
 
@@ -232,41 +274,53 @@ class _MessageBubble extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Container(
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: sage.color, width: 2),
-        ),
+        decoration: AppDecorations.letterBubble(accentColor: sage.color),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // アバター
+            // アバター（金縁フレーム）
             SageAvatar(
               sage: sage,
               size: 50,
               borderWidth: 2,
+              showGoldFrame: true,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             // メッセージ
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    sage.displayName,
-                    style: TextStyle(
-                      color: sage.color,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                    ),
+                  // 名前とサブタイトル
+                  Row(
+                    children: [
+                      Text(
+                        sage.displayName,
+                        style: TextStyle(
+                          color: sage.color,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        sage.subtitle,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textMuted,
+                              fontStyle: FontStyle.italic,
+                              fontSize: 11,
+                            ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
+                  // メッセージ本文
                   Text(
                     item.message,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      height: 1.5,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          height: 1.7,
+                        ),
                   ),
                 ],
               ),
@@ -278,6 +332,7 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
+/// ローディング画面（会議準備中）
 class _LoadingView extends StatefulWidget {
   const _LoadingView();
 
@@ -320,27 +375,44 @@ class _LoadingViewState extends State<_LoadingView> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: 24),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: Text(
-              _messages[_messageIndex],
-              key: ValueKey(_messageIndex),
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        margin: const EdgeInsets.all(24),
+        decoration: AppDecorations.parchmentCard(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ローディングアイコン
+            SizedBox(
+              width: 48,
+              height: 48,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: AppColors.primary,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 24),
+            // メッセージ
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: Text(
+                _messages[_messageIndex],
+                key: ValueKey(_messageIndex),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppColors.textSecondary,
+                      fontStyle: FontStyle.italic,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
+/// エラー画面
 class _ErrorView extends StatelessWidget {
   const _ErrorView({required this.message, required this.onRetry});
 
@@ -349,13 +421,34 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(message, textAlign: TextAlign.center),
-        const SizedBox(height: 12),
-        ElevatedButton(onPressed: onRetry, child: const Text('再試行')),
-      ],
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        margin: const EdgeInsets.all(24),
+        decoration: AppDecorations.parchmentCard(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: AppColors.accent,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('再試行'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

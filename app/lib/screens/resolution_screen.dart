@@ -82,37 +82,68 @@ $votes
       title: '三賢会議',
       body: ListView(
         children: [
-          // 決議書タイトル
+          // 決議書タイトル（書道風）
           Center(
-            child: Text(
-              '決議書',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
+            child: Column(
+              children: [
+                Text(
+                  '決議書',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 4.0,
+                        color: AppColors.textPrimary,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                // 装飾線
+                Container(
+                  width: 60,
+                  height: 2,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.gold.withOpacity(0),
+                        AppColors.gold,
+                        AppColors.gold.withOpacity(0),
+                      ],
+                    ),
                   ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           
-          // 決議内容カード
-          Card(
+          // 決議内容カード（羊皮紙風）
+          Container(
+            decoration: AppDecorations.goldFrameCard(borderWidth: 1.5),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 決議文
-                  Text(
-                    resolution.decision,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          height: 1.6,
-                        ),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.backgroundDark.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.cardBorder),
+                    ),
+                    child: Text(
+                      resolution.decision,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            height: 1.8,
+                            letterSpacing: 0.5,
+                          ),
+                    ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   
                   // 投票セクション
-                  const _SectionTitle(title: '投票'),
-                  const SizedBox(height: 12),
+                  SectionTitle(title: '投票', icon: Icons.how_to_vote),
+                  const SizedBox(height: 16),
                   
                   // 3賢人の投票（横並び）
                   Row(
@@ -135,37 +166,69 @@ $votes
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   
                   // 理由セクション
-                  const _SectionTitle(title: '理由'),
-                  const SizedBox(height: 8),
+                  SectionTitle(title: '理由', icon: Icons.lightbulb_outline),
+                  const SizedBox(height: 12),
                   _BulletList(items: resolution.reasoning),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   
                   // 次の一手セクション
-                  const _SectionTitle(title: '次の一手'),
-                  const SizedBox(height: 8),
+                  SectionTitle(title: '次の一手', icon: Icons.explore),
+                  const SizedBox(height: 12),
                   _BulletList(items: resolution.nextSteps),
                   
                   if (resolution.risks.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    const _SectionTitle(title: 'リスク'),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 20),
+                    SectionTitle(title: 'リスク', icon: Icons.warning_amber),
+                    const SizedBox(height: 12),
                     _BulletList(items: resolution.risks),
                   ],
+                  
+                  // 再審期限
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.secondary.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.event,
+                          size: 18,
+                          color: AppColors.secondary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '再審期限: ${resolution.reviewDate}',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.textSecondary,
+                                fontStyle: FontStyle.italic,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 16),
           
-          // 自動保存メッセージ（審議完了時に自動保存済み）
+          // 自動保存メッセージ（落ち着いた緑）
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF4CAF50).withOpacity(0.1),
+              color: AppColors.success.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.success.withOpacity(0.3)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -173,20 +236,20 @@ $votes
                 Icon(
                   Icons.check_circle,
                   size: 16,
-                  color: const Color(0xFF4CAF50),
+                  color: AppColors.success,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Text(
                   '履歴に自動保存されました',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF4CAF50),
+                        color: AppColors.success,
                         fontWeight: FontWeight.w500,
                       ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           
           // ボタン（左: ラウンド詳細を見る、右: シェア）
           Row(
@@ -194,48 +257,34 @@ $votes
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _showRoundDetail,
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  icon: Icon(Icons.auto_stories, size: 18, color: AppColors.primary),
+                  label: Text(
+                    'ラウンド詳細',
+                    style: TextStyle(color: AppColors.primary),
                   ),
-                  icon: const Icon(Icons.history, size: 18),
-                  label: const Text('ラウンド詳細'),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: _share,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  icon: Icon(Icons.share, size: 18, color: AppColors.goldLight),
+                  label: Text(
+                    'シェア',
+                    style: TextStyle(color: AppColors.goldLight),
                   ),
-                  icon: const Icon(Icons.share, size: 18),
-                  label: const Text('シェア'),
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 16),
         ],
       ),
     );
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-    );
-  }
-}
-
+/// 箇条書きリスト（インクドット風）
 class _BulletList extends StatelessWidget {
   const _BulletList({required this.items});
 
@@ -249,7 +298,10 @@ class _BulletList extends StatelessWidget {
         style: Theme.of(context)
             .textTheme
             .bodySmall
-            ?.copyWith(color: AppColors.textSecondary),
+            ?.copyWith(
+              color: AppColors.textMuted,
+              fontStyle: FontStyle.italic,
+            ),
       );
     }
     return Column(
@@ -257,12 +309,28 @@ class _BulletList extends StatelessWidget {
       children: items
           .map(
             (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('• '),
-                  Expanded(child: Text(item)),
+                  // インクドット風のマーカー
+                  Container(
+                    margin: const EdgeInsets.only(top: 8, right: 10),
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            height: 1.6,
+                          ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -291,40 +359,28 @@ class _VoteCard extends StatelessWidget {
 
     return Column(
       children: [
-        // アバター
+        // アバター（金縁フレーム）
         SageAvatar(
           sage: sage,
           size: 56,
-          borderWidth: 2.5,
+          borderWidth: 2,
+          showGoldFrame: true,
         ),
-        const SizedBox(height: 6),
-        // サブタイトル（東洋の学者など）
+        const SizedBox(height: 8),
+        // サブタイトル
         Text(
           sage.subtitle,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-                fontSize: 11,
+                color: AppColors.textMuted,
+                fontStyle: FontStyle.italic,
+                fontSize: 10,
               ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         // 投票結果バッジ
-        Container(
-          constraints: const BoxConstraints(maxWidth: 90),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: voteColor,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            voteText,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
-            ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-          ),
+        VoteBadge(
+          text: voteText,
+          color: voteColor,
         ),
       ],
     );
@@ -335,7 +391,7 @@ class _VoteCard extends StatelessWidget {
 Color _getVoteColor(String? vote, QuestionType questionType, VoteOptions? options) {
   switch (questionType) {
     case QuestionType.yesno:
-      // Yes/No型: 賛成=青, 反対=ピンク, 保留=黄
+      // Yes/No型
       switch (vote) {
         case 'approve':
           return AppColors.logic;
@@ -347,26 +403,26 @@ Color _getVoteColor(String? vote, QuestionType questionType, VoteOptions? option
       }
     
     case QuestionType.choice:
-      // 選択肢型: A=青, B=ピンク, どちらも=緑, 状況次第=黄
+      // 選択肢型
       switch (vote) {
         case 'A':
           return AppColors.logic;
         case 'B':
           return AppColors.heart;
         case 'both':
-          return const Color(0xFF4CAF50); // 緑
+          return AppColors.success;
         case 'depends':
         default:
           return AppColors.flash;
       }
     
     case QuestionType.open:
-      // オープン型: 強く推奨=青, 推奨=緑, 条件付き=黄
+      // オープン型
       switch (vote) {
         case 'strongly_recommend':
           return AppColors.logic;
         case 'recommend':
-          return const Color(0xFF4CAF50); // 緑
+          return AppColors.success;
         case 'conditional':
         default:
           return AppColors.flash;

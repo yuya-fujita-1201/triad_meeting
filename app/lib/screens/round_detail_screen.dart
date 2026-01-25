@@ -30,35 +30,48 @@ class _RoundDetailScreenState extends State<RoundDetailScreen> {
       title: 'ラウンド詳細',
       body: Column(
         children: [
-          // 相談内容
+          // 相談内容（羊皮紙風）
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(12),
+            decoration: AppDecorations.parchmentCard(
+              borderColor: AppColors.secondary.withOpacity(0.5),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '相談内容',
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.help_outline,
+                      size: 18,
+                      color: AppColors.secondary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '相談内容',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: AppColors.secondary,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 10),
                 Text(
                   widget.consultation.question,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        height: 1.6,
+                        fontStyle: FontStyle.italic,
+                      ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
-          // ラウンドタブ
+          // ラウンドタブ（エレガントなスタイル）
           Row(
             children: List.generate(rounds.length, (index) {
               final isSelected = _selectedRound == index;
@@ -71,18 +84,39 @@ class _RoundDetailScreenState extends State<RoundDetailScreen> {
                       color: isSelected ? AppColors.primary : Colors.transparent,
                       borderRadius: BorderRadius.circular(8),
                       border: isSelected
-                          ? null
-                          : Border.all(color: AppColors.textSecondary.withOpacity(0.3)),
+                          ? Border.all(color: AppColors.gold, width: 1.5)
+                          : Border.all(color: AppColors.cardBorder),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
                     ),
                     margin: EdgeInsets.only(right: index < rounds.length - 1 ? 8 : 0),
-                    child: Text(
-                      'ラウンド ${index + 1}',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.auto_stories,
+                          size: 14,
+                          color: isSelected ? AppColors.goldLight : AppColors.textMuted,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'ラウンド ${index + 1}',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: isSelected ? AppColors.goldLight : AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -91,7 +125,7 @@ class _RoundDetailScreenState extends State<RoundDetailScreen> {
           ),
           const SizedBox(height: 16),
 
-          // メッセージ一覧
+          // メッセージ一覧（手紙風）
           Expanded(
             child: ListView.builder(
               itemCount: rounds.isNotEmpty ? rounds[_selectedRound].messages.length : 0,
@@ -101,6 +135,7 @@ class _RoundDetailScreenState extends State<RoundDetailScreen> {
                 return _RoundMessageBubble(
                   sage: sage,
                   message: message.message,
+                  isLast: index == rounds[_selectedRound].messages.length - 1,
                 );
               },
             ),
@@ -111,76 +146,71 @@ class _RoundDetailScreenState extends State<RoundDetailScreen> {
   }
 }
 
-/// ラウンド詳細用のメッセージバブル
+/// ラウンド詳細用のメッセージバブル（手紙風）
 class _RoundMessageBubble extends StatelessWidget {
   const _RoundMessageBubble({
     required this.sage,
     required this.message,
+    this.isLast = false,
   });
 
   final Sage sage;
   final String message;
+  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
       child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: sage.color, width: 2),
-          boxShadow: [
-            BoxShadow(
-              color: sage.color.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+        padding: const EdgeInsets.all(16),
+        decoration: AppDecorations.letterBubble(accentColor: sage.color),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // アバター
+            // アバター（金縁フレーム）
             SageAvatar(
               sage: sage,
-              size: 48,
+              size: 52,
               borderWidth: 2,
+              showGoldFrame: true,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             // メッセージ内容
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 名前とサブタイトル
                   Row(
                     children: [
                       Text(
                         sage.displayName,
                         style: TextStyle(
                           color: sage.color,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           fontSize: 15,
+                          letterSpacing: 1.0,
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       Text(
                         sage.subtitle,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                              fontSize: 11,
+                              color: AppColors.textMuted,
+                              fontStyle: FontStyle.italic,
+                              fontSize: 10,
                             ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
+                  // メッセージ本文
                   Text(
                     message,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      height: 1.6,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          height: 1.7,
+                        ),
                   ),
                 ],
               ),

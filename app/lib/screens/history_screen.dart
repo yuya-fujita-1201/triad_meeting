@@ -17,11 +17,82 @@ class HistoryScreen extends ConsumerWidget {
     return ConstrainedScaffold(
       title: '履歴',
       body: historyState.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('履歴の取得に失敗しました。')),
+        loading: () => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                color: AppColors.primary,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '履歴を読み込み中...',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                      fontStyle: FontStyle.italic,
+                    ),
+              ),
+            ],
+          ),
+        ),
+        error: (_, __) => Center(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            margin: const EdgeInsets.all(24),
+            decoration: AppDecorations.parchmentCard(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: AppColors.accent,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '履歴の取得に失敗しました。',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ),
+        ),
         data: (items) => items.isEmpty
-            ? const Center(child: Text('履歴がありません。'))
+            ? Center(
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  margin: const EdgeInsets.all(24),
+                  decoration: AppDecorations.parchmentCard(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.history,
+                        size: 48,
+                        color: AppColors.textMuted,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        '履歴がありません',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '会議を開始すると、ここに履歴が表示されます',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textMuted,
+                              fontStyle: FontStyle.italic,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              )
             : RefreshIndicator(
+                color: AppColors.primary,
                 onRefresh: () => ref
                     .read(historyControllerProvider.notifier)
                     .load(),
@@ -34,27 +105,39 @@ class HistoryScreen extends ConsumerWidget {
                     return Dismissible(
                       key: ValueKey(item.consultationId),
                       background: Container(
-                        color: Colors.red.withOpacity(0.15),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: const Icon(Icons.delete, color: Colors.red),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Icon(Icons.delete, color: AppColors.accent),
                       ),
                       direction: DismissDirection.endToStart,
                       confirmDismiss: (_) async {
                         return await showDialog<bool>(
                               context: context,
                               builder: (context) => AlertDialog(
-                                title: const Text('履歴を削除しますか？'),
+                                title: Text(
+                                  '履歴を削除しますか？',
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
                                 content: const Text('この操作は取り消せません。'),
                                 actions: [
                                   TextButton(
                                     onPressed: () =>
                                         Navigator.of(context).pop(false),
-                                    child: const Text('キャンセル'),
+                                    child: Text(
+                                      'キャンセル',
+                                      style: TextStyle(color: AppColors.textSecondary),
+                                    ),
                                   ),
                                   ElevatedButton(
                                     onPressed: () =>
                                         Navigator.of(context).pop(true),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.accent,
+                                    ),
                                     child: const Text('削除'),
                                   ),
                                 ],
@@ -83,7 +166,7 @@ class _HistoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(8),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -94,33 +177,79 @@ class _HistoryCard extends StatelessWidget {
           ),
         );
       },
-      child: Card(
+      child: Container(
+        decoration: AppDecorations.parchmentCard(),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 質問（太字）
               Text(
                 item.question,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                    ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                item.resolution.decision,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: AppColors.textSecondary),
+              const SizedBox(height: 10),
+              
+              // 決議文（サマリー）
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundDark,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border(
+                    left: BorderSide(
+                      color: AppColors.secondary,
+                      width: 3,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  item.resolution.decision,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.5,
+                      ),
+                ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                '${item.createdAt.year}/${item.createdAt.month}/${item.createdAt.day}',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: AppColors.textSecondary),
+              const SizedBox(height: 12),
+              
+              // 日付とアイコン
+              Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    size: 14,
+                    color: AppColors.textMuted,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${item.createdAt.year}/${item.createdAt.month.toString().padLeft(2, '0')}/${item.createdAt.day.toString().padLeft(2, '0')}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(
+                          color: AppColors.textMuted,
+                          fontStyle: FontStyle.italic,
+                        ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 14,
+                    color: AppColors.textMuted,
+                  ),
+                ],
               ),
             ],
           ),

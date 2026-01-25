@@ -64,49 +64,85 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ],
       body: ListView(
         children: [
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
+          
+          // キャッチコピー（書道風）
           Text(
             '3つの視点で、迷いを終わらせる',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontStyle: FontStyle.italic,
+                  color: AppColors.textSecondary,
+                  letterSpacing: 1.5,
+                ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
+          
+          // 装飾線
+          _buildDecorativeLine(),
+          const SizedBox(height: 24),
+          
           // 上段: 論理（中央寄せ）
           const Center(
             child: SizedBox(
-              width: 160,
+              width: 170,
               child: SageCard(sage: Sage.logic, showSubtitle: true),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          
           // 下段: 共感・直感（横並び）
           const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                width: 150,
+                width: 155,
                 child: SageCard(sage: Sage.empathy, showSubtitle: true),
               ),
               SizedBox(width: 16),
               SizedBox(
-                width: 150,
+                width: 155,
                 child: SageCard(sage: Sage.intuition, showSubtitle: true),
               ),
             ],
           ),
           const SizedBox(height: 24),
-          TextField(
-            controller: _controller,
-            maxLines: 2,
-            maxLength: 200,
-            decoration: const InputDecoration(
-              hintText: '悩みを入力...',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(12)),
+          
+          // 装飾線
+          _buildDecorativeLine(),
+          const SizedBox(height: 24),
+          
+          // 入力フィールド（羊皮紙風）
+          Container(
+            decoration: AppDecorations.parchmentCard(),
+            child: TextField(
+              controller: _controller,
+              maxLines: 3,
+              maxLength: 200,
+              style: Theme.of(context).textTheme.bodyMedium,
+              decoration: InputDecoration(
+                hintText: '相談したいことを入力してください...',
+                hintStyle: TextStyle(
+                  color: AppColors.textMuted,
+                  fontStyle: FontStyle.italic,
+                ),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Icon(
+                    Icons.edit_note,
+                    color: AppColors.secondary,
+                  ),
+                ),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.all(16),
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 20),
+          
+          // 開始ボタン（えんじ色＋金文字）
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -114,14 +150,73 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: const Text(
-                '会議を開始する',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.auto_awesome,
+                    size: 20,
+                    color: AppColors.goldLight,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '会議を開始する',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.5,
+                      color: AppColors.goldLight,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
+          const SizedBox(height: 16),
         ],
       ),
+    );
+  }
+
+  /// 装飾線（羽ペン風）
+  Widget _buildDecorativeLine() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.cardBorder.withOpacity(0),
+                  AppColors.gold.withOpacity(0.5),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Icon(
+            Icons.auto_awesome,
+            size: 16,
+            color: AppColors.gold,
+          ),
+        ),
+        Expanded(
+          child: Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.gold.withOpacity(0.5),
+                  AppColors.cardBorder.withOpacity(0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
