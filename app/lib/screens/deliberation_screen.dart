@@ -271,58 +271,77 @@ class _MessageBubble extends StatelessWidget {
     final sage = _sage;
     
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: AppDecorations.letterBubble(accentColor: sage.color),
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: IntrinsicHeight(
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // アバター（金縁フレーム）
-            SageAvatar(
-              sage: sage,
-              size: 50,
-              borderWidth: 2,
-              showGoldFrame: true,
+            // 左側のアクセントバー
+            Container(
+              width: 4,
+              decoration: BoxDecoration(
+                color: sage.color,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  bottomLeft: Radius.circular(8),
+                ),
+              ),
             ),
-            const SizedBox(width: 14),
-            // メッセージ
+            // メインコンテンツ
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 名前とサブタイトル
-                  Row(
-                    children: [
-                      Text(
-                        sage.displayName,
-                        style: TextStyle(
-                          color: sage.color,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        sage.subtitle,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textMuted,
-                              fontStyle: FontStyle.italic,
-                              fontSize: 11,
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.card,
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(8),
+                    bottomRight: Radius.circular(8),
+                  ),
+                  border: Border(
+                    top: BorderSide(color: AppColors.cardBorder, width: 1),
+                    right: BorderSide(color: AppColors.cardBorder, width: 1),
+                    bottom: BorderSide(color: AppColors.cardBorder, width: 1),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // アバター
+                    SageAvatar(
+                      sage: sage,
+                      size: 44,
+                      borderWidth: 2,
+                      showGoldFrame: false,
+                    ),
+                    const SizedBox(width: 10),
+                    // メッセージ
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 名前
+                          Text(
+                            sage.displayName,
+                            style: TextStyle(
+                              color: sage.color,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
                             ),
+                          ),
+                          const SizedBox(height: 4),
+                          // メッセージ本文
+                          Text(
+                            item.message,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  height: 1.5,
+                                  fontSize: 13,
+                                ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // メッセージ本文
-                  Text(
-                    item.message,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          height: 1.7,
-                        ),
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

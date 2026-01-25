@@ -214,17 +214,16 @@ class AppDecorations {
   }
 
   /// メッセージバブル用のデコレーション（手紙風）
+  /// 左側にアクセントカラーのボーダーを表示
   static BoxDecoration letterBubble({
     required Color accentColor,
   }) {
     return BoxDecoration(
       color: AppColors.card,
-      borderRadius: BorderRadius.circular(12),
-      border: Border(
-        left: BorderSide(color: accentColor, width: 3),
-        top: BorderSide(color: AppColors.cardBorder, width: 1),
-        right: BorderSide(color: AppColors.cardBorder, width: 1),
-        bottom: BorderSide(color: AppColors.cardBorder, width: 1),
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(
+        color: AppColors.cardBorder,
+        width: 1,
       ),
       boxShadow: [
         BoxShadow(
