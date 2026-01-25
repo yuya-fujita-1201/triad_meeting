@@ -7,6 +7,7 @@ import '../providers/providers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/constrained_scaffold.dart';
 import '../widgets/sage_avatar.dart';
+import 'round_detail_screen.dart';
 
 class ResolutionScreen extends ConsumerStatefulWidget {
   const ResolutionScreen({
@@ -26,6 +27,8 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
   @override
   void initState() {
     super.initState();
+    // 審議画面で既に自動保存済み
+    
     if (widget.showAd) {
       final adService = ref.read(adServiceProvider);
       adService.loadInterstitial();
@@ -35,12 +38,12 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
     }
   }
 
-  Future<void> _save() async {
-    final local = ref.read(localStorageProvider);
-    await local.saveConsultation(widget.consultation);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('履歴に保存しました。')),
+  /// ラウンド詳細画面へ遷移
+  void _showRoundDetail() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => RoundDetailScreen(consultation: widget.consultation),
+      ),
     );
   }
 
@@ -157,26 +160,56 @@ $votes
           ),
           const SizedBox(height: 16),
           
-          // ボタン
+          // 自動保存メッセージ（審議完了時に自動保存済み）
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4CAF50).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  size: 16,
+                  color: const Color(0xFF4CAF50),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '履歴に自動保存されました',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: const Color(0xFF4CAF50),
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          
+          // ボタン（左: ラウンド詳細を見る、右: シェア）
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
-                  onPressed: _save,
+                child: OutlinedButton.icon(
+                  onPressed: _showRoundDetail,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('保存'),
+                  icon: const Icon(Icons.history, size: 18),
+                  label: const Text('ラウンド詳細'),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   onPressed: _share,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('シェア'),
+                  icon: const Icon(Icons.share, size: 18),
+                  label: const Text('シェア'),
                 ),
               ),
             ],

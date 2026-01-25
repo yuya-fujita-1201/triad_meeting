@@ -147,7 +147,7 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
     return ConstrainedScaffold(
       title: '審議',
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const _LoadingView()
           : _errorMessage != null
               ? _ErrorView(message: _errorMessage!, onRetry: _loadConsultation)
               : Column(
@@ -273,6 +273,69 @@ class _MessageBubble extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _LoadingView extends StatefulWidget {
+  const _LoadingView();
+
+  @override
+  State<_LoadingView> createState() => _LoadingViewState();
+}
+
+class _LoadingViewState extends State<_LoadingView> {
+  int _messageIndex = 0;
+  Timer? _timer;
+
+  static const _messages = [
+    '会議を準備中...',
+    '三賢人を召喚中...',
+    '論理の学者が分析中...',
+    '共感の修道士が傾聴中...',
+    '直感の預言者が洞察中...',
+    '議論を整理中...',
+    '決議をまとめ中...',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 2), (_) {
+      if (mounted) {
+        setState(() {
+          _messageIndex = (_messageIndex + 1) % _messages.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 24),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: Text(
+              _messages[_messageIndex],
+              key: ValueKey(_messageIndex),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+          ),
+        ],
       ),
     );
   }

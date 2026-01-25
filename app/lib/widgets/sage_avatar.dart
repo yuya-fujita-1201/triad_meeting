@@ -32,11 +32,11 @@ enum Sage {
   String get subtitle {
     switch (this) {
       case Sage.logic:
-        return '東洋の学者';
+        return '論理の学者';
       case Sage.empathy:
-        return '西洋の修道士';
+        return '共感の修道士';
       case Sage.intuition:
-        return '西洋の預言者';
+        return '直感の預言者';
     }
   }
 
