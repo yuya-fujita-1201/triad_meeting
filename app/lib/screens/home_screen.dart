@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/providers.dart';
 import '../theme/app_theme.dart';
-import '../widgets/ai_card.dart';
 import '../widgets/constrained_scaffold.dart';
+import '../widgets/sage_avatar.dart';
 import 'deliberation_screen.dart';
 import 'history_screen.dart';
 import 'settings_screen.dart';
@@ -74,59 +74,51 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // 上段: 論理（中央寄せ）
           const Center(
             child: SizedBox(
-              width: 180,
-              height: 160,
-              child: AiCard(
-                title: '論理',
-                description: '論理的思考',
-                color: AppColors.logic,
-                imagePath: 'assets/images/sage_logic.png',
-              ),
+              width: 160,
+              child: SageCard(sage: Sage.logic),
             ),
           ),
           const SizedBox(height: 12),
           // 下段: 共感・直感（横並び）
           const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Expanded(
-                child: SizedBox(
-                  height: 160,
-                  child: AiCard(
-                    title: '共感',
-                    description: '感情・共感',
-                    color: AppColors.heart,
-                    imagePath: 'assets/images/sage_empathy.png',
-                  ),
-                ),
+              SizedBox(
+                width: 150,
+                child: SageCard(sage: Sage.empathy),
               ),
-              SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: 160,
-                  child: AiCard(
-                    title: '直感',
-                    description: '直感・行動',
-                    color: AppColors.flash,
-                    imagePath: 'assets/images/sage_intuition.png',
-                  ),
-                ),
+              SizedBox(width: 16),
+              SizedBox(
+                width: 150,
+                child: SageCard(sage: Sage.intuition),
               ),
             ],
           ),
           const SizedBox(height: 24),
           TextField(
             controller: _controller,
-            maxLines: 3,
+            maxLines: 2,
             maxLength: 200,
             decoration: const InputDecoration(
-              labelText: '相談内容',
-              hintText: '相談したいことを入力してください...',
+              hintText: '悩みを入力...',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
             ),
           ),
           const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: _startConsultation,
-            child: const Text('会議を開始する'),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _startConsultation,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: const Text(
+                '会議を開始する',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
           ),
         ],
       ),

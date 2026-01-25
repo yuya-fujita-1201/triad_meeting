@@ -6,6 +6,7 @@ import '../models/consultation.dart';
 import '../providers/providers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/constrained_scaffold.dart';
+import '../widgets/sage_avatar.dart';
 
 class ResolutionScreen extends ConsumerStatefulWidget {
   const ResolutionScreen({
@@ -37,6 +38,7 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
   Future<void> _save() async {
     final local = ref.read(localStorageProvider);
     await local.saveConsultation(widget.consultation);
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('履歴に保存しました。')),
     );
@@ -49,16 +51,19 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
 
   String _buildShareText(Consultation consultation) {
     final resolution = consultation.resolution;
-    final votes = resolution.votes.entries
-        .map((entry) => '${_labelForAi(entry.key)}: ${entry.value}')
-        .join('\n');
+    final votes = [
+      '${Sage.logic.displayName}: ${_voteLabel(resolution.votes['logic'])}',
+      '${Sage.empathy.displayName}: ${_voteLabel(resolution.votes['heart'])}',
+      '${Sage.intuition.displayName}: ${_voteLabel(resolution.votes['flash'])}',
+    ].join('\n');
     final reasoning = resolution.reasoning.join(' / ');
     final nextSteps = resolution.nextSteps.join(' / ');
     return '''相談: ${consultation.question}
 
 決議: ${resolution.decision}
 
-投票:\n$votes
+投票:
+$votes
 
 理由: $reasoning
 次の一手: $nextSteps
@@ -66,61 +71,80 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
 ''';
   }
 
-  String _labelForAi(String ai) {
-    switch (ai) {
-      case 'logic':
-        return '論理';
-      case 'heart':
-        return '共感';
-      case 'flash':
-        return '直感';
-      default:
-        return ai;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final resolution = widget.consultation.resolution;
 
     return ConstrainedScaffold(
-      title: '決議書',
+      title: '三賢会議',
       body: ListView(
         children: [
+          // 決議書タイトル
+          Center(
+            child: Text(
+              '決議書',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          // 決議内容カード
           Card(
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 決議文
                   Text(
                     resolution.decision,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall
-                        ?.copyWith(fontWeight: FontWeight.w700),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          height: 1.6,
+                        ),
                   ),
+                  const SizedBox(height: 20),
+                  
+                  // 投票セクション
+                  const _SectionTitle(title: '投票'),
                   const SizedBox(height: 12),
-                  _SectionTitle(title: '投票'),
-                  const SizedBox(height: 8),
-                  _VoteRow(label: '論理', value: resolution.votes['logic']),
-                  _VoteRow(label: '共感', value: resolution.votes['heart']),
-                  _VoteRow(label: '直感', value: resolution.votes['flash']),
-                  const SizedBox(height: 12),
-                  _SectionTitle(title: '理由'),
+                  
+                  // 3賢人の投票（横並び）
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _VoteCard(
+                        sage: Sage.logic,
+                        vote: resolution.votes['logic'],
+                      ),
+                      _VoteCard(
+                        sage: Sage.empathy,
+                        vote: resolution.votes['heart'],
+                      ),
+                      _VoteCard(
+                        sage: Sage.intuition,
+                        vote: resolution.votes['flash'],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // 理由セクション
+                  const _SectionTitle(title: '理由'),
                   const SizedBox(height: 8),
                   _BulletList(items: resolution.reasoning),
-                  const SizedBox(height: 12),
-                  _SectionTitle(title: '次の一手'),
+                  const SizedBox(height: 16),
+                  
+                  // 次の一手セクション
+                  const _SectionTitle(title: '次の一手'),
                   const SizedBox(height: 8),
                   _BulletList(items: resolution.nextSteps),
-                  const SizedBox(height: 12),
-                  _SectionTitle(title: '再審期限'),
-                  const SizedBox(height: 8),
-                  Text(resolution.reviewDate),
+                  
                   if (resolution.risks.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    _SectionTitle(title: 'リスク'),
+                    const SizedBox(height: 16),
+                    const _SectionTitle(title: 'リスク'),
                     const SizedBox(height: 8),
                     _BulletList(items: resolution.risks),
                   ],
@@ -129,11 +153,16 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
             ),
           ),
           const SizedBox(height: 16),
+          
+          // ボタン
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
                   onPressed: _save,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
                   child: const Text('保存'),
                 ),
               ),
@@ -141,18 +170,13 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: _share,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
                   child: const Text('シェア'),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '相談内容: ${widget.consultation.question}',
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -169,10 +193,9 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: Theme.of(context)
-          .textTheme
-          .titleSmall
-          ?.copyWith(fontWeight: FontWeight.w700),
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
     );
   }
 }
@@ -213,32 +236,56 @@ class _BulletList extends StatelessWidget {
   }
 }
 
-class _VoteRow extends StatelessWidget {
-  const _VoteRow({required this.label, this.value});
+/// 投票カード（アバター + サブタイトル + 投票結果）
+class _VoteCard extends StatelessWidget {
+  const _VoteCard({
+    required this.sage,
+    this.vote,
+  });
 
-  final String label;
-  final String? value;
+  final Sage sage;
+  final String? vote;
 
   @override
   Widget build(BuildContext context) {
-    final display = _voteLabel(value);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        children: [
-          Expanded(child: Text(label)),
-          Text(
-            display,
-            style: TextStyle(
-              color: display == '賛成'
-                  ? AppColors.logic
-                  : display == '反対'
-                      ? AppColors.heart
-                      : AppColors.textSecondary,
+    final voteText = _voteLabel(vote);
+    final voteColor = _voteColor(vote);
+
+    return Column(
+      children: [
+        // アバター
+        SageAvatar(
+          sage: sage,
+          size: 56,
+          borderWidth: 2.5,
+        ),
+        const SizedBox(height: 6),
+        // サブタイトル（東洋の学者など）
+        Text(
+          sage.subtitle,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+                fontSize: 11,
+              ),
+        ),
+        const SizedBox(height: 4),
+        // 投票結果バッジ
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: voteColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            voteText,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -253,5 +300,17 @@ String _voteLabel(String? value) {
       return '保留';
     default:
       return '保留';
+  }
+}
+
+Color _voteColor(String? value) {
+  switch (value) {
+    case 'approve':
+      return AppColors.logic; // 青
+    case 'reject':
+      return AppColors.heart; // ピンク
+    case 'pending':
+    default:
+      return AppColors.flash; // 黄
   }
 }

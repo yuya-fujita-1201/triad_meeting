@@ -9,6 +9,7 @@ import '../services/api_service.dart';
 import '../services/local_storage_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/constrained_scaffold.dart';
+import '../widgets/sage_avatar.dart';
 import 'resolution_screen.dart';
 
 class DeliberationScreen extends ConsumerStatefulWidget {
@@ -151,25 +152,17 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
               ? _ErrorView(message: _errorMessage!, onRetry: _loadConsultation)
               : Column(
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          'ラウンド $_currentRound / 3',
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        const Spacer(),
-                        if (_consultation != null)
-                          Text(
-                            '相談: ${widget.question}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: AppColors.textSecondary),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                      ],
+                    // ラウンド表示
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        'ラウンド $_currentRound / 3',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Expanded(
                       child: ListView.builder(
                         controller: _scrollController,
@@ -229,53 +222,55 @@ class _MessageBubble extends StatelessWidget {
 
   final _TimelineItem item;
 
-  Color get _color {
-    switch (item.ai) {
-      case 'heart':
-        return AppColors.heart;
-      case 'flash':
-        return AppColors.flash;
-      case 'logic':
-      default:
-        return AppColors.logic;
-    }
-  }
-
-  String get _label {
-    switch (item.ai) {
-      case 'heart':
-        return '共感';
-      case 'flash':
-        return '直感';
-      case 'logic':
-      default:
-        return '論理';
-    }
-  }
+  Sage get _sage => Sage.fromApiKey(item.ai);
 
   @override
   Widget build(BuildContext context) {
+    final sage = _sage;
+    
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _color.withOpacity(0.25)),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: sage.color, width: 2),
         ),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              _label,
-              style: TextStyle(
-                color: _color,
-                fontWeight: FontWeight.w700,
+            // アバター
+            SageAvatar(
+              sage: sage,
+              size: 50,
+              borderWidth: 2,
+            ),
+            const SizedBox(width: 12),
+            // メッセージ
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    sage.displayName,
+                    style: TextStyle(
+                      color: sage.color,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    item.message,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 6),
-            Text(item.message),
           ],
         ),
       ),
