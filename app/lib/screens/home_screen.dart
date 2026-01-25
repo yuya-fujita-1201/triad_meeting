@@ -75,7 +75,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const Center(
             child: SizedBox(
               width: 160,
-              child: SageCard(sage: Sage.logic),
+              child: SageCard(sage: Sage.logic, showSubtitle: true),
             ),
           ),
           const SizedBox(height: 12),
@@ -85,12 +85,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               SizedBox(
                 width: 150,
-                child: SageCard(sage: Sage.empathy),
+                child: SageCard(sage: Sage.empathy, showSubtitle: true),
               ),
               SizedBox(width: 16),
               SizedBox(
                 width: 150,
-                child: SageCard(sage: Sage.intuition),
+                child: SageCard(sage: Sage.intuition, showSubtitle: true),
               ),
             ],
           ),
