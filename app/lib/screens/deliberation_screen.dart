@@ -244,12 +244,12 @@ class _MessageBubble extends StatelessWidget {
   String get _label {
     switch (item.ai) {
       case 'heart':
-        return 'ハート';
+        return '共感';
       case 'flash':
-        return 'フラッシュ';
+        return '直感';
       case 'logic':
       default:
-        return 'ロジック';
+        return '論理';
     }
   }
 

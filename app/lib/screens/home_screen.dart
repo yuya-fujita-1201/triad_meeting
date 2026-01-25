@@ -68,27 +68,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Text(
             '3つの視点で、迷いを終わらせる',
             style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
-          const AiCard(
-            title: 'ロジック',
-            description: '事実とデータで論理的に整理します。',
-            color: AppColors.logic,
-            icon: Icons.analytics_outlined,
+          const SizedBox(height: 20),
+          // 上段: 論理（中央寄せ）
+          const Center(
+            child: SizedBox(
+              width: 180,
+              height: 160,
+              child: AiCard(
+                title: '論理',
+                description: '論理的思考',
+                color: AppColors.logic,
+                imagePath: 'assets/images/sage_logic.png',
+              ),
+            ),
           ),
           const SizedBox(height: 12),
-          const AiCard(
-            title: 'ハート',
-            description: '感情や人間関係の視点を尊重します。',
-            color: AppColors.heart,
-            icon: Icons.favorite_border,
-          ),
-          const SizedBox(height: 12),
-          const AiCard(
-            title: 'フラッシュ',
-            description: '直感的で行動重視の提案を行います。',
-            color: AppColors.flash,
-            icon: Icons.flash_on,
+          // 下段: 共感・直感（横並び）
+          const Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 160,
+                  child: AiCard(
+                    title: '共感',
+                    description: '感情・共感',
+                    color: AppColors.heart,
+                    imagePath: 'assets/images/sage_empathy.png',
+                  ),
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 160,
+                  child: AiCard(
+                    title: '直感',
+                    description: '直感・行動',
+                    color: AppColors.flash,
+                    imagePath: 'assets/images/sage_intuition.png',
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
           TextField(
@@ -97,13 +120,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             maxLength: 200,
             decoration: const InputDecoration(
               labelText: '相談内容',
-              hintText: '1〜2文で具体的に入力してください。',
+              hintText: '相談したいことを入力してください...',
             ),
           ),
           const SizedBox(height: 12),
           ElevatedButton(
             onPressed: _startConsultation,
-            child: const Text('会議を始める'),
+            child: const Text('会議を開始する'),
           ),
         ],
       ),
