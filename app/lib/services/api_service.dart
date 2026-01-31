@@ -41,13 +41,10 @@ class ApiService {
   String _getUserId() {
     final user = _currentUser();
     if (user != null) {
-      print('🔵 Using Firebase UID: ${user.uid}');
       return user.uid;
     }
     // 匿名ユーザーの場合は端末固有のデバイスIDを使用
-    final deviceId = _localStorage.getDeviceId();
-    print('🔵 Using Device ID: $deviceId');
-    return deviceId;
+    return _localStorage.getDeviceId();
   }
 
   Future<Consultation> deliberate(String consultation) async {

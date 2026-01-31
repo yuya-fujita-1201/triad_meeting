@@ -1,7 +1,7 @@
 class AppConfig {
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://api.sankenkaigi.com',
+    defaultValue: 'https://us-central1-triad-meeting.cloudfunctions.net/api',
   );
 
   static const String adMobAppId = String.fromEnvironment(

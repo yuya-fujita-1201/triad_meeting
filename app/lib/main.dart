@@ -23,7 +23,7 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     firebaseReady = true;
-  } catch (_) {
+  } catch (e) {
     firebaseReady = false;
   }
 
@@ -44,7 +44,7 @@ Future<void> main() async {
     try {
       await FirebaseAuth.instance.signInAnonymously();
     } catch (_) {
-      // Firebase settings may be missing in early setup; continue with limited mode.
+      // Continue with limited mode if anonymous sign-in fails
     }
   }
 
@@ -69,11 +69,17 @@ class _TriadCouncilAppState extends ConsumerState<TriadCouncilApp> {
   @override
   void initState() {
     super.initState();
-    unawaited(ref.read(analyticsProvider).logAppOpen());
+    // Firebaseが初期化されている場合のみログを送信
+    try {
+      unawaited(ref.read(analyticsProvider).logAppOpen());
+    } catch (e) {
+      print('🔴 Analytics failed: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    print('🟢 Building MaterialApp');
     return MaterialApp(
       title: '三賢会議',
       theme: AppTheme.lightTheme(),
