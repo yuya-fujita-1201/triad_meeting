@@ -4,9 +4,10 @@ import 'package:firebase_core/firebase_core.dart';
 
 import '../config/app_config.dart';
 import '../models/consultation.dart';
+import 'local_storage_service.dart';
 
 class ApiService {
-  ApiService()
+  ApiService(this._localStorage)
       : _dio = Dio(
           BaseOptions(
             baseUrl: '${AppConfig.apiBaseUrl}/v1',
@@ -29,10 +30,24 @@ class ApiService {
   }
 
   final Dio _dio;
+  final LocalStorageService _localStorage;
 
   User? _currentUser() {
     if (Firebase.apps.isEmpty) return null;
     return FirebaseAuth.instance.currentUser;
+  }
+
+  /// ユーザーIDを取得（Firebase認証済みの場合はuid、未認証の場合はデバイスID）
+  String _getUserId() {
+    final user = _currentUser();
+    if (user != null) {
+      print('🔵 Using Firebase UID: ${user.uid}');
+      return user.uid;
+    }
+    // 匿名ユーザーの場合は端末固有のデバイスIDを使用
+    final deviceId = _localStorage.getDeviceId();
+    print('🔵 Using Device ID: $deviceId');
+    return deviceId;
   }
 
   Future<Consultation> deliberate(String consultation) async {
@@ -40,11 +55,8 @@ class ApiService {
       final data = <String, dynamic>{
         'consultation': consultation,
         'plan': 'free',
+        'userId': _getUserId(),
       };
-      final userId = _currentUser()?.uid;
-      if (userId != null) {
-        data['userId'] = userId;
-      }
       final response = await _dio.post<Map<String, dynamic>>(
         '/deliberate',
         data: data,
@@ -75,11 +87,8 @@ class ApiService {
       final params = <String, dynamic>{
         'limit': limit,
         'offset': offset,
+        'userId': _getUserId(),
       };
-      final userId = _currentUser()?.uid;
-      if (userId != null) {
-        params['userId'] = userId;
-      }
       final response = await _dio.get<Map<String, dynamic>>(
         '/history',
         queryParameters: params,
@@ -100,11 +109,9 @@ class ApiService {
   }
 
   Future<Consultation> fetchConsultation(String id) async {
-    final params = <String, dynamic>{};
-    final userId = _currentUser()?.uid;
-    if (userId != null) {
-      params['userId'] = userId;
-    }
+    final params = <String, dynamic>{
+      'userId': _getUserId(),
+    };
     final response = await _dio.get<Map<String, dynamic>>(
       '/consultations/$id',
       queryParameters: params,
@@ -113,11 +120,10 @@ class ApiService {
   }
 
   Future<void> saveConsultation(Consultation consultation) async {
-    final data = <String, dynamic>{'consultation': consultation.toJson()};
-    final userId = _currentUser()?.uid;
-    if (userId != null) {
-      data['userId'] = userId;
-    }
+    final data = <String, dynamic>{
+      'consultation': consultation.toJson(),
+      'userId': _getUserId(),
+    };
     await _dio.post(
       '/consultations/${consultation.consultationId}/save',
       data: data,
@@ -125,11 +131,9 @@ class ApiService {
   }
 
   Future<void> deleteConsultation(String id) async {
-    final params = <String, dynamic>{};
-    final userId = _currentUser()?.uid;
-    if (userId != null) {
-      params['userId'] = userId;
-    }
+    final params = <String, dynamic>{
+      'userId': _getUserId(),
+    };
     await _dio.delete(
       '/consultations/$id',
       queryParameters: params,

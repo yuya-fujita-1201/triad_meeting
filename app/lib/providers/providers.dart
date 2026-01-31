@@ -14,7 +14,10 @@ final analyticsProvider = Provider<AnalyticsService>((ref) {
   return AnalyticsService(FirebaseAnalytics.instance);
 });
 
-final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
+final apiServiceProvider = Provider<ApiService>((ref) {
+  final localStorage = ref.read(localStorageProvider);
+  return ApiService(localStorage);
+});
 
 final localStorageProvider = Provider<LocalStorageService>((ref) {
   throw UnimplementedError('LocalStorageService must be initialized');

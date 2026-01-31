@@ -129,9 +129,10 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
     if (!_scrollController.hasClients) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
+      // reverse: trueの場合、最新のメッセージは位置0にあるため、0にスクロール
       _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent + 120,
-        duration: const Duration(milliseconds: 300),
+        0,
+        duration: const Duration(milliseconds: 150),
         curve: Curves.easeOut,
       );
     });
@@ -183,10 +184,18 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
                     Expanded(
                       child: ListView.builder(
                         controller: _scrollController,
+                        // 逆順にすることで、新規アイテム追加時に既存アイテムの位置が変わらない
+                        reverse: true,
                         itemCount: _displayed.length,
+                        // アイテムの位置を固定するためにKeyを追加
                         itemBuilder: (context, index) {
-                          final item = _displayed[index];
-                          return _MessageBubble(item: item);
+                          // reverse: trueなので、逆順でアクセス
+                          final reversedIndex = _displayed.length - 1 - index;
+                          final item = _displayed[reversedIndex];
+                          return _MessageBubble(
+                            key: ValueKey(reversedIndex),
+                            item: item,
+                          );
                         },
                       ),
                     ),
@@ -260,7 +269,7 @@ class _TimelineItem {
 
 /// 手紙風のメッセージバブル
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.item});
+  const _MessageBubble({super.key, required this.item});
 
   final _TimelineItem item;
 

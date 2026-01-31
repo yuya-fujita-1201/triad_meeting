@@ -70,6 +70,7 @@ router.post('/deliberate', async (req: AuthenticatedRequest, res) => {
   try {
     const body = deliberateSchema.parse(req.body);
     const userId = req.userId ?? body.userId;
+    logger.info('deliberate_request', { userId, bodyUserId: body.userId, reqUserId: req.userId });
     if (!userId) {
       return res.status(400).json({ error: 'Missing userId' });
     }
@@ -177,7 +178,7 @@ router.post('/deliberate', async (req: AuthenticatedRequest, res) => {
 
     const resolution = {
       questionType,
-      options,
+      ...(options && { options }),
       decision,
       votes,
       reasoning: Array.isArray(safeResolution.reasoning)
@@ -215,7 +216,11 @@ router.post('/deliberate', async (req: AuthenticatedRequest, res) => {
       createdAt,
     });
   } catch (error) {
-    logger.error('deliberate_failed', { error });
+    logger.error('deliberate_failed', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      error
+    });
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.flatten() });
     }

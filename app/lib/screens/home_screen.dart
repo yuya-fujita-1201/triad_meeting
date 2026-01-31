@@ -41,7 +41,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       MaterialPageRoute(
         builder: (_) => DeliberationScreen(question: text),
       ),
-    );
+    ).then((_) {
+      // 審議画面から戻ってきたらテキストをクリア
+      _controller.clear();
+    });
   }
 
   @override
@@ -62,8 +65,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           tooltip: '設定',
         ),
       ],
-      body: ListView(
-        children: [
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: ListView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: [
           const SizedBox(height: 16),
           
           // キャッチコピー（書道風）
@@ -119,6 +125,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               controller: _controller,
               maxLines: 3,
               maxLength: 200,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => FocusScope.of(context).unfocus(),
               style: Theme.of(context).textTheme.bodyMedium,
               decoration: InputDecoration(
                 hintText: '相談したいことを入力してください...',
@@ -174,6 +182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(height: 16),
         ],
+      ),
       ),
     );
   }
