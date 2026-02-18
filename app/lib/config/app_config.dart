@@ -13,4 +13,17 @@ class AppConfig {
     'ADMOB_INTERSTITIAL_ID',
     defaultValue: 'ca-app-pub-3940256099942544/1033173712',
   );
+
+  // RevenueCat
+  static const String revenueCatApiKey = String.fromEnvironment(
+    'REVENUECAT_API_KEY',
+    defaultValue: '', // RevenueCat ダッシュボードで取得した Apple API Key を設定
+  );
+
+  // RevenueCat Entitlement ID
+  static const String premiumEntitlementId = 'premium';
+
+  // RevenueCat Product IDs
+  static const String weeklyProductId = 'triad_meeting_weekly';
+  static const String monthlyProductId = 'triad_meeting_monthly';
 }

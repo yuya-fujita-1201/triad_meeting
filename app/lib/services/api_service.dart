@@ -47,11 +47,11 @@ class ApiService {
     return _localStorage.getDeviceId();
   }
 
-  Future<Consultation> deliberate(String consultation) async {
+  Future<Consultation> deliberate(String consultation, {bool isPremium = false}) async {
     try {
       final data = <String, dynamic>{
         'consultation': consultation,
-        'plan': 'free',
+        'plan': isPremium ? 'premium' : 'free',
         'userId': _getUserId(),
       };
       final response = await _dio.post<Map<String, dynamic>>(

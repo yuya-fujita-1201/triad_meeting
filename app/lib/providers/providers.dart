@@ -6,6 +6,7 @@ import '../services/ad_service.dart';
 import '../services/analytics_service.dart';
 import '../services/api_service.dart';
 import '../services/local_storage_service.dart';
+import '../services/purchase_service.dart';
 
 final analyticsProvider = Provider<AnalyticsService>((ref) {
   if (Firebase.apps.isEmpty) {
@@ -25,4 +26,9 @@ final localStorageProvider = Provider<LocalStorageService>((ref) {
 
 final adServiceProvider = Provider<AdService>((ref) {
   return AdService(ref.read(analyticsProvider));
+});
+
+final purchaseServiceProvider =
+    ChangeNotifierProvider<PurchaseService>((ref) {
+  return PurchaseService();
 });

@@ -8,6 +8,7 @@ import '../providers/history_controller.dart';
 import '../providers/providers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/constrained_scaffold.dart';
+import 'paywall_screen.dart';
 import 'privacy_policy_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -93,13 +94,106 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user =
         Firebase.apps.isNotEmpty ? FirebaseAuth.instance.currentUser : null;
+    final purchaseService = ref.watch(purchaseServiceProvider);
+    final isPremium = purchaseService.isPremium;
 
     return ConstrainedScaffold(
       title: '設定',
       body: ListView(
         children: [
           const SizedBox(height: 8),
-          
+
+          // プレミアムステータスカード
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+            decoration: isPremium
+                ? AppDecorations.goldFrameCard()
+                : AppDecorations.parchmentCard(),
+            child: ListTile(
+              leading: Icon(
+                isPremium ? Icons.auto_awesome : Icons.workspace_premium,
+                color: isPremium ? AppColors.gold : AppColors.secondary,
+              ),
+              title: Text(
+                isPremium ? 'プレミアム会員' : 'フリープラン',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isPremium ? AppColors.primaryDark : null,
+                    ),
+              ),
+              subtitle: Text(
+                isPremium
+                    ? '無制限の相談・広告なし'
+                    : '1日10回まで・広告表示あり',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+              trailing: isPremium
+                  ? null
+                  : Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'アップグレード',
+                        style: TextStyle(
+                          color: AppColors.goldLight,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+              onTap: isPremium
+                  ? null
+                  : () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => const PaywallScreen()),
+                      ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // 購入復元（プレミアムでない場合のみ）
+          if (!isPremium) ...[
+            Container(
+              decoration: AppDecorations.parchmentCard(),
+              child: ListTile(
+                leading: Icon(
+                  Icons.restore,
+                  color: AppColors.secondary,
+                ),
+                title: Text(
+                  '購入を復元',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                trailing: Icon(
+                  Icons.chevron_right,
+                  color: AppColors.textMuted,
+                ),
+                onTap: () async {
+                  final success = await purchaseService.restore();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(success
+                            ? '購入を復元しました！'
+                            : '復元可能な購入が見つかりませんでした'),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+
           // ユーザー情報カード
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
@@ -124,9 +218,9 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // プライバシーポリシー
           Container(
             decoration: AppDecorations.parchmentCard(),
@@ -150,9 +244,9 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // アカウント削除
           Container(
             decoration: BoxDecoration(
@@ -179,9 +273,9 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => _deleteAccount(context, ref),
             ),
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // アプリ情報
           Center(
             child: Column(

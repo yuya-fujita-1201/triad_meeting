@@ -12,6 +12,7 @@ import 'firebase_options.dart';
 import 'providers/providers.dart';
 import 'screens/home_screen.dart';
 import 'services/local_storage_service.dart';
+import 'services/purchase_service.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -48,10 +49,15 @@ Future<void> main() async {
     }
   }
 
+  // RevenueCat 初期化
+  final purchaseService = PurchaseService();
+  await purchaseService.init();
+
   runApp(
     ProviderScope(
       overrides: [
         localStorageProvider.overrideWithValue(localStorage),
+        purchaseServiceProvider.overrideWithValue(purchaseService),
       ],
       child: const TriadCouncilApp(),
     ),

@@ -10,6 +10,7 @@ import '../services/local_storage_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/constrained_scaffold.dart';
 import '../widgets/sage_avatar.dart';
+import 'paywall_screen.dart';
 import 'resolution_screen.dart';
 
 class DeliberationScreen extends ConsumerStatefulWidget {
@@ -30,6 +31,7 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
   bool _loading = true;
   bool _complete = false;
   String? _errorMessage;
+  bool _showUpgradeButton = false;
 
   @override
   void initState() {
@@ -47,8 +49,9 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
   Future<void> _loadConsultation() async {
     final api = ref.read(apiServiceProvider);
     final local = ref.read(localStorageProvider);
+    final isPremium = ref.read(purchaseServiceProvider).isPremium;
     try {
-      final consultation = await api.deliberate(widget.question);
+      final consultation = await api.deliberate(widget.question, isPremium: isPremium);
       await local.saveConsultation(consultation);
       final count = local.incrementConsultationCount();
       if (!mounted) return;
@@ -76,13 +79,26 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
       _startPlayback();
     } on DailyLimitExceededException catch (error) {
       if (!mounted) return;
-      final resetAt = error.resetAt;
-      setState(() {
-        _loading = false;
-        _errorMessage = resetAt == null
-            ? error.message
-            : '${error.message}\nリセット: $resetAt';
-      });
+      final isPremium = ref.read(purchaseServiceProvider).isPremium;
+      if (!isPremium) {
+        // 無料ユーザーにはペイウォールを案内
+        final resetAt = error.resetAt;
+        setState(() {
+          _loading = false;
+          _errorMessage = resetAt == null
+              ? '${error.message}\n\nプレミアムプランなら無制限に相談できます。'
+              : '${error.message}\nリセット: $resetAt\n\nプレミアムプランなら無制限に相談できます。';
+          _showUpgradeButton = true;
+        });
+      } else {
+        final resetAt = error.resetAt;
+        setState(() {
+          _loading = false;
+          _errorMessage = resetAt == null
+              ? error.message
+              : '${error.message}\nリセット: $resetAt';
+        });
+      }
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -150,7 +166,19 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
       body: _loading
           ? const _LoadingView()
           : _errorMessage != null
-              ? _ErrorView(message: _errorMessage!, onRetry: _loadConsultation)
+              ? _ErrorView(
+                  message: _errorMessage!,
+                  onRetry: _loadConsultation,
+                  showUpgrade: _showUpgradeButton,
+                  onUpgrade: () async {
+                    final result = await Navigator.of(context).push<bool>(
+                      MaterialPageRoute(builder: (_) => const PaywallScreen()),
+                    );
+                    if (result == true && mounted) {
+                      _loadConsultation();
+                    }
+                  },
+                )
               : Column(
                   children: [
                     // ラウンド表示（羊皮紙風）
@@ -205,11 +233,12 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: () {
+                            final isPremium = ref.read(purchaseServiceProvider).isPremium;
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
                                 builder: (_) => ResolutionScreen(
                                   consultation: _consultation!,
-                                  showAd: true,
+                                  showAd: !isPremium,
                                 ),
                               ),
                             );
@@ -442,10 +471,17 @@ class _LoadingViewState extends State<_LoadingView> {
 
 /// エラー画面
 class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.message, required this.onRetry});
+  const _ErrorView({
+    required this.message,
+    required this.onRetry,
+    this.showUpgrade = false,
+    this.onUpgrade,
+  });
 
   final String message;
   final VoidCallback onRetry;
+  final bool showUpgrade;
+  final VoidCallback? onUpgrade;
 
   @override
   Widget build(BuildContext context) {
@@ -469,6 +505,20 @@ class _ErrorView extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 20),
+            if (showUpgrade && onUpgrade != null) ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: onUpgrade,
+                  icon: Icon(Icons.auto_awesome, color: AppColors.goldLight),
+                  label: Text(
+                    'プレミアムにアップグレード',
+                    style: TextStyle(color: AppColors.goldLight),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
