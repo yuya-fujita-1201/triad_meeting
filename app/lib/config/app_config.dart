@@ -6,12 +6,12 @@ class AppConfig {
 
   static const String adMobAppId = String.fromEnvironment(
     'ADMOB_APP_ID',
-    defaultValue: 'ca-app-pub-3940256099942544~3347511713',
+    defaultValue: 'ca-app-pub-2551004292724620~2672533121',
   );
 
   static const String adMobInterstitialId = String.fromEnvironment(
     'ADMOB_INTERSTITIAL_ID',
-    defaultValue: 'ca-app-pub-3940256099942544/1033173712',
+    defaultValue: 'ca-app-pub-2551004292724620/2398469875',
   );
 
   // RevenueCat

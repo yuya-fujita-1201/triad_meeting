@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サポート - 三賢会議（Triad Council）</title>
+    <meta name="description" content="三賢会議のサポートページ。よくある質問、お問い合わせ方法をご確認いただけます。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Zen Kaku Gothic New', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.8;
+            color: #2b2623;
+            background: linear-gradient(135deg, #fffaf2 0%, #fff5e6 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 60px 20px 40px;
+            background: linear-gradient(135deg, rgba(255, 207, 149, 0.3) 0%, rgba(255, 143, 94, 0.2) 100%);
+            border-radius: 18px;
+        }
+
+        h1 {
+            font-size: clamp(26px, 4vw, 40px);
+            font-weight: 700;
+            color: #2b2623;
+            margin-bottom: 16px;
+        }
+
+        .subtitle {
+            font-size: clamp(14px, 2.5vw, 18px);
+            color: #6b5f58;
+            font-weight: 500;
+        }
+
+        .lead {
+            font-size: clamp(15px, 2.5vw, 17px);
+            color: #6b5f58;
+            line-height: 1.9;
+            margin-bottom: 24px;
+        }
+
+        .section {
+            background: #fffaf2;
+            padding: 40px;
+            margin-bottom: 30px;
+            border-radius: 18px;
+            box-shadow: 0 4px 12px rgba(255, 143, 94, 0.08);
+        }
+
+        h2 {
+            font-size: clamp(22px, 3.5vw, 28px);
+            font-weight: 700;
+            color: #ff8f5e;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #ffcf95;
+        }
+
+        h3 {
+            font-size: clamp(18px, 3vw, 22px);
+            font-weight: 600;
+            color: #2b2623;
+            margin: 32px 0 16px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: #4a4039;
+        }
+
+        ul, ol {
+            margin-left: 24px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 12px;
+            color: #4a4039;
+        }
+
+        .contact-box {
+            background: linear-gradient(135deg, rgba(255, 207, 149, 0.15) 0%, rgba(255, 143, 94, 0.1) 100%);
+            padding: 32px;
+            border-radius: 12px;
+            border-left: 4px solid #ff8f5e;
+            margin: 24px 0;
+        }
+
+        .contact-box h3 {
+            margin-top: 0;
+        }
+
+        .email-link {
+            color: #ff8f5e;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .email-link:hover {
+            color: #ff6f3e;
+            text-decoration: underline;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .feature-list li {
+            padding-left: 32px;
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #ff8f5e;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .faq-item {
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0e8dc;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: #2b2623;
+            margin-bottom: 8px;
+            font-size: 17px;
+        }
+
+        .faq-answer {
+            color: #6b5f58;
+            padding-left: 20px;
+        }
+
+        .note {
+            background: #fff9f0;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 3px solid #ffcf95;
+            margin: 20px 0;
+            font-size: 15px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b5f58;
+            font-size: 14px;
+            margin-top: 60px;
+        }
+
+        footer a {
+            color: #ff8f5e;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-link {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #ff8f5e 0%, #ff6f3e 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            margin-top: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 143, 94, 0.3);
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 20px 16px;
+            }
+
+            .section {
+                padding: 24px 20px;
+            }
+
+            header {
+                padding: 40px 20px 30px;
+                margin-bottom: 40px;
+            }
+
+            .contact-box {
+                padding: 24px 20px;
+            }
+
+            ul, ol {
+                margin-left: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>三賢会議 サポート</h1>
+            <p class="subtitle">Triad Council - Support</p>
+        </header>
+
+        <div class="section">
+            <p class="lead">
+                三賢会議は、3人のAI賢者があなたの相談事を多角的に審議し、最適な答えを導き出すアプリです。<br>
+                人生の重要な決断、日々の悩み、選択肢の比較など、あらゆるテーマについて3人の賢者が異なる視点から議論を行い、最終的な決議を提示します。
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>主な機能</h2>
+            <ul class="feature-list">
+                <li><strong>テーマ入力</strong> - 相談したいテーマや悩みを自由に入力できます</li>
+                <li><strong>AI審議</strong> - 3人の賢者（AI）が自動的に議論を開始し、異なる視点から意見を交わします</li>
+                <li><strong>決議書</strong> - 審議の結果を美しい決議書形式で受け取ることができます</li>
+                <li><strong>履歴管理</strong> - 過去の審議内容を保存し、いつでも見返すことができます</li>
+                <li><strong>共有機能</strong> - 決議書を画像として保存・共有できます</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>よくある質問</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">Q1. 審議にどのくらい時間がかかりますか？</div>
+                <div class="faq-answer">テーマの複雑さにもよりますが、通常30秒〜1分程度で審議が完了します。</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q2. 審議の途中で中断できますか？</div>
+                <div class="faq-answer">はい。審議画面を閉じても、履歴から再度確認することができます。</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q3. インターネット接続は必要ですか？</div>
+                <div class="faq-answer">はい。AI賢者による審議にはインターネット接続が必要です。過去の履歴の閲覧はオフラインでも可能です。</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q4. 何回まで審議を依頼できますか？</div>
+                <div class="faq-answer">Phase 1（現バージョン）では、回数制限なく無料でご利用いただけます。</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q5. 過去の審議を削除できますか？</div>
+                <div class="faq-answer">はい。履歴画面から個別に削除することができます。</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q6. 審議内容のプライバシーは保護されますか？</div>
+                <div class="faq-answer">はい。詳細は<a href="../privacy/" style="color: #ff8f5e;">プライバシーポリシー</a>をご確認ください。</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q7. オフラインで使用できますか？</div>
+                <div class="faq-answer">審議機能にはインターネット接続が必要ですが、過去の履歴の閲覧はオフラインでも可能です。</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q8. 広告が表示されますか？</div>
+                <div class="faq-answer">はい。Phase 1では広告表示により無料でサービスを提供しています。</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q9. 対応デバイスは？</div>
+                <div class="faq-answer">iPhone (iOS 13.0以降)、iPad (iPadOS 13.0以降) に対応しています。</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q10. アカウント登録は必要ですか？</div>
+                <div class="faq-answer">基本機能の利用にはアカウント登録は不要です。ただし、履歴をクラウドに保存する場合は、Firebaseアカウントでのログインが必要です。</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>使い方ガイド</h2>
+
+            <h3>はじめての方へ</h3>
+            <ol>
+                <li><strong>アプリを起動</strong> - アプリアイコンをタップして起動します</li>
+                <li><strong>テーマを入力</strong> - ホーム画面の入力欄に相談したいテーマを入力（例: "転職すべきか現職に残るべきか"）</li>
+                <li><strong>審議を開始</strong> - 「審議を開始する」ボタンをタップ</li>
+                <li><strong>審議を閲覧</strong> - 3人の賢者が議論する様子をリアルタイムで確認</li>
+                <li><strong>決議書を確認</strong> - 審議が完了すると決議書が表示されます</li>
+                <li><strong>履歴から再確認</strong> - 過去の審議は履歴画面から確認可能</li>
+            </ol>
+
+            <h3>上手に使うコツ</h3>
+            <div class="note">
+                <strong>テーマ入力のポイント:</strong>
+                <ul>
+                    <li>具体的に: "仕事について" → "上司との関係改善方法"</li>
+                    <li>背景情報を含める: "結婚すべきか" → "交際3年の恋人と結婚すべきか、キャリアを優先すべきか"</li>
+                    <li>選択肢がある場合は明記: "AとBどちらを選ぶべきか"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>トラブルシューティング</h2>
+
+            <h3>アプリが起動しない</h3>
+            <ol>
+                <li>デバイスを再起動してください</li>
+                <li>アプリを削除して再インストールしてください</li>
+                <li>iOSを最新版にアップデートしてください</li>
+            </ol>
+
+            <h3>審議が開始されない</h3>
+            <ol>
+                <li>インターネット接続を確認してください</li>
+                <li>アプリを再起動してください</li>
+                <li>サーバーがメンテナンス中の可能性があります（時間をおいて再試行）</li>
+            </ol>
+
+            <h3>履歴が表示されない</h3>
+            <ol>
+                <li>アプリを再起動してください</li>
+                <li>ログインしている場合、一度ログアウトして再ログインしてください</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2>お問い合わせ</h2>
+
+            <div class="contact-box">
+                <h3>サポート窓口</h3>
+                <p>ご不明な点、不具合の報告、機能リクエストなどがございましたら、以下の方法でお問い合わせください。</p>
+
+                <p style="margin-top: 24px;">
+                    <strong>Email:</strong><br>
+                    <a href="mailto:marumi.works@gmail.com" class="email-link">marumi.works@gmail.com</a>
+                </p>
+
+                <p style="margin-top: 24px; font-size: 15px; color: #6b5f58;">
+                    <strong>回答時間:</strong> 通常、1-3営業日以内に返信いたします
+                </p>
+            </div>
+
+            <h3>お問い合わせの前に</h3>
+            <p>以下の情報をご準備いただくと、スムーズに対応できます:</p>
+            <ul>
+                <li>お名前（ニックネーム可）</li>
+                <li>使用デバイス（例: iPhone 15 Pro, iPad Air）</li>
+                <li>iOSバージョン（例: iOS 18.2）</li>
+                <li>アプリバージョン（設定画面で確認可能）</li>
+                <li>問題の詳細、発生状況</li>
+                <li>スクリーンショット（可能であれば）</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>リンク</h2>
+            <ul>
+                <li><a href="../privacy/" style="color: #ff8f5e; font-weight: 600;">プライバシーポリシー</a></li>
+                <li><a href="https://apps.apple.com/app/" style="color: #ff8f5e; font-weight: 600;">App Store（準備中）</a></li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 三賢会議 (Triad Council). All rights reserved.</p>
+            <p style="margin-top: 12px;">最終更新日: 2026年1月31日</p>
+            <p style="margin-top: 16px;"><a href="https://marumi-works.com/">← ホームに戻る</a></p>
+        </footer>
+    </div>
+</body>
+</html>

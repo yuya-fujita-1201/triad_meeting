@@ -1,7 +1,12 @@
 .DS_Store
 .worktrees/
+
+# Server
 server/node_modules/
 server/dist/
+server/.env
+
+# App
 app/.dart_tool/
 app/build/
 app/ios/Pods/
