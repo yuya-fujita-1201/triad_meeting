@@ -129,16 +129,33 @@ curl -s -X POST ... -d '{"id": "flutter_build_ios_release", "async": true}' "<ng
 curl -s -H "Authorization: Bearer snap2026" "<ngrok-url>/api/jobs/<jobId>"  # 結果確認
 ```
 
+### マルチプロジェクト対応（2026-02-19追加）
+- `projects.json` でプロジェクト一覧を管理（再起動不要で切替可能）
+- **プロジェクト切替**: API or CLI or Web UIから
+  ```bash
+  # API経由
+  curl -s -X POST -H "Authorization: Bearer snap2026" -H "ngrok-skip-browser-warning: true" \
+    -H "Content-Type: application/json" \
+    -d '{"project": "triad_meeting"}' "<ngrok-url>/api/switch-project"
+
+  # CLIスクリプト経由
+  bash ~/Projects/cowork-codex-relay/bin/switch-project.sh triad_meeting [ngrok-url]
+  ```
+- **リクエスト単位の指定**: `workingDir` にプロジェクトID指定可
+  ```bash
+  curl -s -X POST ... -d '{"id": "flutter_analyze", "workingDir": "triad_meeting"}' "<ngrok-url>/api/execute"
+  ```
+- 登録済みプロジェクト:
+  - `snap_english`: `/Users/yuyafujita/Projects/ai-director-project/app/snap_english`
+  - `triad_meeting`: `/Users/yuyafujita/Projects/triad_meeting/app`
+- **注意**: triad_meetingのパスが `~/Desktop/workspaces/` → `~/Projects/` に移動済み（2026-02-19）
+
 ### 重要なトラブルシューティング（2026-02-19 解決済み）
 1. **ngrok URL検出の問題**: `relay-service.sh url` でURL未検出と表示されることがあるが、`relay-service.sh logs` で実際のURLを確認できる
 2. **Flutter PATH問題（LaunchAgent）**: LaunchAgentはユーザーのシェルPATHを継承しない。解決策:
    - `server.js` の `spawn()` で `shell: true` を設定（`shell: false` → `shell: true`）
    - これにより `/opt/homebrew/bin/flutter` が見つかるようになる
    - 補助: `sudo ln -sf /opt/homebrew/bin/flutter /usr/local/bin/flutter`
-3. **作業ディレクトリの変更**: `.env` ファイルの `RELAY_WORKDIR` を変更して `restart`
-   - 現在の設定: `RELAY_WORKDIR=/Users/yuyafujita/Desktop/workspaces/triad_meeting/app`
-   - SnapEnglishに戻す場合: `/Users/yuyafujita/Projects/ai-director-project/app/snap_english`
-4. **プロジェクトの実際のパス**: `~/Desktop/workspaces/triad_meeting/`（`~/Projects/` ではない）
 
 ### 初回セットアップ手順（新しいMacや再インストール時）
 ```bash
