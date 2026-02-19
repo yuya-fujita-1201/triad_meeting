@@ -6,6 +6,10 @@ server/node_modules/
 server/dist/
 server/.env
 
+# Functions
+functions/.env
+functions/node_modules/
+
 # App
 app/.dart_tool/
 app/build/
