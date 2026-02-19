@@ -10,6 +10,10 @@ server/.env
 functions/.env
 functions/node_modules/
 
+# Firebase config (contains API keys)
+app/android/app/google-services.json
+app/ios/Runner/GoogleService-Info.plist
+
 # App
 app/.dart_tool/
 app/build/
