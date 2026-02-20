@@ -26,3 +26,6 @@ app/android/.idea/
 app/android/local.properties
 app/**/.flutter-plugins
 app/**/.flutter-plugins-dependencies
+
+# App Store Connect API Key (sensitive)
+.appstoreconnect/

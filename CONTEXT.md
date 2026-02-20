@@ -1,5 +1,5 @@
 # 三賢会議 (Triad Council) ― コンテキスト引き継ぎドキュメント
-# 最終更新: 2026-02-19 04:30 Cowork — App Store審査提出完了
+# 最終更新: 2026-02-20 17:00 Cowork — App Store審査再提出完了（Build 7）
 
 ---
 
@@ -120,15 +120,30 @@
 - [x] アプリのプライバシー: 公開済み（7データタイプ）
 - [x] ビルド選択: Build 3 → Build 6 に変更
 - [x] 暗号化コンプライアンス: カスタム暗号化なし（Apple標準HTTPSのみ）
-- [x] **App Store 審査提出完了**（2026-02-19 04:28 JST）
-  - ステータス: 「審査待ち」（最大48時間）
+- [x] **App Store 審査提出完了**（2026-02-19 04:28 JST）— Build 6
+
+### 審査リジェクト対応 & Build 7 再提出（2026-02-20 Cowork）
+- **リジェクト理由**: Guideline 2.1 - Performance: App Completeness（iPad Air 11-inch M3 でクラッシュ）
+- [x] Codexコミット（d9c35e8）レビュー: Firebase初期化ガード、TARGETED_DEVICE_FAMILY="1,2"
+- [x] pubspec.yaml バージョン変更: 1.0.0+1 → 1.0.0+7
+- [x] Info.plist: UIInterfaceOrientationPortraitUpsideDown 追加（iPad multitasking要件）
+- [x] flutter build ios --release → Xcode Archive → IPA Export（Mac直接実行）
+- [x] xcrun altool でアップロード（App Store Connect API Key認証: P26V6QTLTW）
+- [x] Build 7 処理完了 → バージョンにBuild 7追加
+- [x] 暗号化コンプライアンス設定（「上記のアルゴリズムのどれでもない」）
+- [x] iPad 13インチスクリーンショット4枚をApp Store Connect API経由でアップロード
+- [x] **App Store 審査再提出完了**（2026-02-20 17:00 JST）— Build 7
+  - ステータス: 「審査待ち」
+
+### 自動化ノウハウ（2026-02-20 蓄積）
+- App Store Connect API Key: `P26V6QTLTW`、Issuer: `e359cd97-a6d4-4ef9-bcb3-24336fda0e74`
+- .p8キー保存先: `.appstoreconnect/private_keys/AuthKey_P26V6QTLTW.p8`（.gitignore済み）
+- スクリーンショットAPI アップロード: JWT生成 → screenshotSet作成 → reserve → upload → commit
+- ExportOptions.plist: `destination: export`（uploadだとAPIキー不在でエラー）
 
 ---
 
 ## ⏳ 未完了タスク（審査通過後・今後）
-
-### git コミット
-- [ ] 全変更をまとめてコミット（RevenueCat・AdMob・中継サーバー修正・Info.plist修正等）
 
 ### RevenueCat ダッシュボード設定（Phase 2 課金有効化時）
 - [ ] App Store Connect でサブスクリプション商品作成（週額・月額）
@@ -142,9 +157,9 @@
 
 ## 🔜 次のアクション（優先順）
 
-1. **審査結果を待つ**（最大48時間）
-2. **git コミット** → 全変更をまとめてコミット
-3. **審査結果に応じた対応**
+1. **審査結果を待つ**（Build 7、最大48時間）
+2. **審査結果に応じた対応**
+3. **RevenueCat ダッシュボード設定**（審査通過後）
 
 ---
 

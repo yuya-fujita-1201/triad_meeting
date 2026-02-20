@@ -172,8 +172,11 @@ sleep 5 && bash ~/Projects/ai-director-project/scripts/relay-service.sh logs
 - Bundle ID: `com.sankenkaigi.app`
 - Team ID: `5CMYP437MX`
 - 価格: 無料
-- 現在のビルド: Build 6 (1.0.0)
-- ステータス: **審査待ち**（2026-02-19 提出）
+- 現在のビルド: Build 7 (1.0.0+7)
+- ステータス: **審査待ち**（2026-02-20 再提出）
+- App Store Connect API Key ID: `P26V6QTLTW`
+- API Issuer ID: `e359cd97-a6d4-4ef9-bcb3-24336fda0e74`
+- .p8キー保存先: `.appstoreconnect/private_keys/AuthKey_P26V6QTLTW.p8`
 
 ---
 
@@ -191,9 +194,12 @@ sleep 5 && bash ~/Projects/ai-director-project/scripts/relay-service.sh logs
 - Phase 1 コード実装完了（2026-01-24頃 Genspark AI Developer）
 - RevenueCat課金機能実装済み（2026-02-19 Cowork）
 - AdMob本番ID設定済み
-- **App Store 審査提出完了**（2026-02-19 04:28 JST — Build 6）
-- ステータス: 「審査待ち」（最大48時間）
-- **未完了**: git コミット（ローカル変更あり）、RevenueCatダッシュボード設定（Phase 2）
+- Build 6 審査リジェクト（Guideline 2.1 — iPadクラッシュ）→ Firebase初期化ガード修正・iPad対応
+- **App Store 審査再提出完了**（2026-02-20 17:00 JST — Build 7）
+- ステータス: 「審査待ち」
+- .p8キーをプロジェクトフォルダに保存済み（`.appstoreconnect/private_keys/`）
+- iPadスクリーンショットはApp Store Connect API経由でアップロード
+- **未完了**: RevenueCatダッシュボード設定（Phase 2）
 
 ---
 
