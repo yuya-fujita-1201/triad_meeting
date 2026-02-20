@@ -183,10 +183,17 @@ sleep 5 && bash ~/Projects/ai-director-project/scripts/relay-service.sh logs
 ## カスタムスキル（.skills/）
 | スキル名 | 用途 |
 |---|---|
-| app-store-connect-browser | App Store Connect ブラウザ自動操作 |
+| app-store-connect-browser | App Store Connect ブラウザ自動操作（サブスクリプション設定、アプリ登録等） |
+| app-store-connect-api | App Store Connect API自動化（スクショアップロード、審査提出、暗号化コンプライアンス等） |
 | revenuecat-browser | RevenueCat ブラウザ操作（Phase 2用） |
 
-スキルはai-director-projectから継承。使用時は `.skills/{スキル名}/SKILL.md` を読むこと。
+スキルはai-director-projectから継承・拡張。使用時は `.skills/{スキル名}/SKILL.md` を読むこと。
+**ファイルアップロードが必要な操作は必ずAPI版を使うこと**（ブラウザのファイルピッカーはVM操作不可）。
+
+## 自動化スクリプト（scripts/）
+| スクリプト | 用途 |
+|---|---|
+| scripts/upload_screenshots.py | App Store Connectにスクリーンショットをアップロード（`--device ipad-13` / `--device iphone-6.7` 等） |
 
 ---
 
