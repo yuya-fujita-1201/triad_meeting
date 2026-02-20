@@ -17,15 +17,26 @@ import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  bool firebaseReady = false;
+  final localStorage = LocalStorageService();
 
-  var firebaseReady = false;
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
     firebaseReady = true;
+  } on FirebaseException catch (e) {
+    // FirebaseCore が既に初期化済みの場合は duplicate-app が出る可能性があるため継続する
+    if (e.code == 'duplicate-app') {
+      firebaseReady = true;
+    } else {
+      debugPrint('❌ Firebase init failed: $e');
+    }
   } catch (e) {
-    firebaseReady = false;
+    // Firebase の初期化失敗時は機能を制限して起動を継続する
+    debugPrint('❌ Firebase init failed: $e');
   }
 
   if (firebaseReady) {
@@ -36,10 +47,19 @@ Future<void> main() async {
     };
   }
 
-  await MobileAds.instance.initialize();
+  try {
+    await MobileAds.instance.initialize();
+  } catch (e) {
+    // 広告SDK初期化失敗時もアプリ起動は継続する
+    debugPrint('❌ AdMob init failed: $e');
+  }
 
-  final localStorage = LocalStorageService();
-  await localStorage.init();
+  try {
+    await localStorage.init();
+  } catch (e) {
+    // ローカル保存領域の初期化失敗時は、アプリ起動を止めない
+    debugPrint('❌ LocalStorage init failed: $e');
+  }
 
   if (firebaseReady) {
     try {
@@ -51,16 +71,32 @@ Future<void> main() async {
 
   // RevenueCat 初期化
   final purchaseService = PurchaseService();
-  await purchaseService.init();
+  try {
+    await purchaseService.init();
+  } catch (e) {
+    // 課金SDK初期化失敗時も続行
+    debugPrint('❌ Purchase init failed: $e');
+  }
 
-  runApp(
-    ProviderScope(
-      overrides: [
-        localStorageProvider.overrideWithValue(localStorage),
-        purchaseServiceProvider.overrideWith((ref) => purchaseService),
-      ],
-      child: const TriadCouncilApp(),
-    ),
+  runZonedGuarded(
+    () {
+      runApp(
+        ProviderScope(
+          overrides: [
+            localStorageProvider.overrideWithValue(localStorage),
+            purchaseServiceProvider.overrideWith((ref) => purchaseService),
+          ],
+          child: const TriadCouncilApp(),
+        ),
+      );
+    },
+    (error, stack) {
+      if (firebaseReady) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      } else {
+        debugPrint('🟠 Unhandled app error: $error\n$stack');
+      }
+    },
   );
 }
 
