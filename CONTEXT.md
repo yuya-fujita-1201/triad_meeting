@@ -150,6 +150,17 @@
 - [ ] RevenueCat ダッシュボードでOfferings設定
 - [ ] RevenueCat API Key を取得してビルド時に設定
 
+### Build 7 再リジェクト対応 & Build 8 準備（2026-02-23 Cowork）
+- **リジェクト理由**: Guideline 2.1 - Performance: App Completeness（iPad Air 11-inch M3 / iPadOS 26.2.1 でクラッシュ — Build 6と同じ）
+- **根本原因特定**: `LSRequiresIPhoneOS = true`（Info.plist）と `TARGETED_DEVICE_FAMILY = "1,2"`（project.pbxproj）の矛盾
+  - LSRequiresIPhoneOS は「iPhoneのみ」を意味し、iPadで起動するとOSレベルでクラッシュ
+  - Firebase初期化ガードではDartコード到達前のクラッシュなので修正にならなかった
+- [x] Info.plist: `LSRequiresIPhoneOS` キーを削除
+- [x] Info.plist: `UISupportedInterfaceOrientations~ipad` キーを追加（iPad用画面回転設定）
+- [x] main.dart: `purchaseServiceProvider.overrideWith()` → `overrideWithValue()` に修正
+- [ ] flutter analyze で検証（中継サーバー再起動が必要）
+- [ ] Build 8 作成・アップロード・審査再提出
+
 ### 審査結果対応
 - [ ] 審査通過 → リリース / 審査リジェクト → 修正対応
 

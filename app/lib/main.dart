@@ -84,7 +84,7 @@ Future<void> main() async {
         ProviderScope(
           overrides: [
             localStorageProvider.overrideWithValue(localStorage),
-            purchaseServiceProvider.overrideWith((ref) => purchaseService),
+            purchaseServiceProvider.overrideWithValue(purchaseService),
           ],
           child: const TriadCouncilApp(),
         ),

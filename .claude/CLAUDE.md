@@ -202,10 +202,11 @@ sleep 5 && bash ~/Projects/ai-director-project/scripts/relay-service.sh logs
 - RevenueCat課金機能実装済み（2026-02-19 Cowork）
 - AdMob本番ID設定済み
 - Build 6 審査リジェクト（Guideline 2.1 — iPadクラッシュ）→ Firebase初期化ガード修正・iPad対応
-- **App Store 審査再提出完了**（2026-02-20 17:00 JST — Build 7）
-- ステータス: 「審査待ち」
+- Build 7 再リジェクト（2026-02-20 — Guideline 2.1 iPadクラッシュ再発）
+- **根本原因**: `LSRequiresIPhoneOS=true` と `TARGETED_DEVICE_FAMILY="1,2"` の矛盾
+- **修正済み**（2026-02-23）: LSRequiresIPhoneOS削除、iPad回転設定追加、Riverpod override修正
+- **次のステップ**: Build 8 作成・アップロード・審査再提出（中継サーバー再起動が必要）
 - .p8キーをプロジェクトフォルダに保存済み（`.appstoreconnect/private_keys/`）
-- iPadスクリーンショットはApp Store Connect API経由でアップロード
 - **未完了**: RevenueCatダッシュボード設定（Phase 2）
 
 ---
