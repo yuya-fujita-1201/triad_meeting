@@ -22,9 +22,16 @@ Future<void> main() async {
 
   try {
     if (Firebase.apps.isEmpty) {
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
+      // まず options なしで初期化を試みる（iOS: GoogleService-Info.plist、
+      // Android: google-services.json からネイティブ側で自動設定される）
+      try {
+        await Firebase.initializeApp();
+      } catch (_) {
+        // ネイティブ設定ファイルがない場合は Dart 側のオプションで初期化
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+      }
     }
     firebaseReady = true;
   } on FirebaseException catch (e) {
@@ -35,8 +42,11 @@ Future<void> main() async {
       debugPrint('❌ Firebase init failed: $e');
     }
   } catch (e) {
-    // Firebase の初期化失敗時は機能を制限して起動を継続する
-    debugPrint('❌ Firebase init failed: $e');
+    // ネイティブ側で既に初期化済みの場合でもアプリを起動する
+    debugPrint('❌ Firebase init error: $e');
+    if (Firebase.apps.isNotEmpty) {
+      firebaseReady = true;
+    }
   }
 
   if (firebaseReady) {
@@ -84,7 +94,7 @@ Future<void> main() async {
         ProviderScope(
           overrides: [
             localStorageProvider.overrideWithValue(localStorage),
-            purchaseServiceProvider.overrideWithValue(purchaseService),
+            purchaseServiceProvider.overrideWith((ref) => purchaseService),
           ],
           child: const TriadCouncilApp(),
         ),

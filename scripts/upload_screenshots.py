@@ -17,13 +17,13 @@ import sys
 import argparse
 
 # App Store Connect API credentials
-API_KEY_ID = "P26V6QTLTW"
+API_KEY_ID = "JLULX74QSP"
 ISSUER_ID = "e359cd97-a6d4-4ef9-bcb3-24336fda0e74"
 
 # Resolve paths relative to project root
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
-P8_KEY_PATH = os.path.join(PROJECT_ROOT, ".appstoreconnect/private_keys/AuthKey_P26V6QTLTW.p8")
+P8_KEY_PATH = os.path.join(PROJECT_ROOT, ".appstoreconnect/private_keys/AuthKey_JLULX74QSP.p8")
 
 # App info
 APP_ID = "6758553766"

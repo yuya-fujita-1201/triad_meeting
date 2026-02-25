@@ -16,6 +16,7 @@ class PurchaseService extends ChangeNotifier {
   PurchaseService();
 
   bool _isInitialized = false;
+  bool _configureAttempted = false; // Purchases.configure() 二重呼び出し防止
   bool _isPremium = false;
   List<StoreProduct> _products = [];
   String? _errorMessage;
@@ -25,35 +26,54 @@ class PurchaseService extends ChangeNotifier {
   List<StoreProduct> get products => _products;
   String? get errorMessage => _errorMessage;
 
-  /// RevenueCat を初期化
+  /// APIキーがプレースホルダーかどうかを検証
+  static bool _isPlaceholderKey(String key) {
+    final lower = key.toLowerCase();
+    return key.isEmpty ||
+        lower.contains('placeholder') ||
+        lower.startsWith('appl_xxxx') ||
+        lower == 'appl_' ||
+        lower.startsWith('your_');
+  }
+
+  /// RevenueCat を初期化（リトライロジック付き）
   Future<void> init() async {
     if (_isInitialized) return;
 
     final apiKey = AppConfig.revenueCatApiKey;
-    if (apiKey.isEmpty) {
-      debugPrint('⚠️ RevenueCat API Key が未設定です');
+
+    // プレースホルダーキーの検出
+    if (_isPlaceholderKey(apiKey)) {
+      debugPrint('⚠️ RevenueCat API Key が未設定またはプレースホルダーです: '
+          '${apiKey.isEmpty ? "(空)" : apiKey.substring(0, apiKey.length.clamp(0, 10))}...');
       _isInitialized = true;
       notifyListeners();
       return;
     }
 
-    try {
-      await Purchases.setLogLevel(LogLevel.debug);
-      final configuration = PurchasesConfiguration(apiKey);
-      await Purchases.configure(configuration);
-      _isInitialized = true;
-
-      // 現在の課金状態を取得
-      await refreshPurchaseStatus();
-
-      // 商品情報を取得
-      await loadProducts();
-    } catch (e) {
-      debugPrint('❌ RevenueCat 初期化エラー: $e');
-      _errorMessage = 'サブスクリプションサービスの初期化に失敗しました';
-      _isInitialized = true;
-      notifyListeners();
+    // Purchases.configure() は1度しか呼べないため、フラグで防止
+    if (!_configureAttempted) {
+      _configureAttempted = true;
+      try {
+        await Purchases.setLogLevel(LogLevel.debug);
+        final configuration = PurchasesConfiguration(apiKey);
+        await Purchases.configure(configuration);
+      } catch (e) {
+        debugPrint('❌ RevenueCat configure エラー: $e');
+        _errorMessage = 'ただいま準備中です。少し時間をおいて再度お試しください。';
+        _isInitialized = true;
+        notifyListeners();
+        return;
+      }
     }
+
+    _isInitialized = true;
+
+    // 課金状態と商品情報をリトライ付きで取得
+    await refreshPurchaseStatus();
+    await _loadProductsWithRetry();
+
+    notifyListeners();
   }
 
   /// 課金状態をリフレッシュ
@@ -70,27 +90,54 @@ class PurchaseService extends ChangeNotifier {
     }
   }
 
-  /// 商品情報を読み込み
-  Future<void> loadProducts() async {
-    try {
-      final offerings = await Purchases.getOfferings();
-      final current = offerings.current;
-      if (current != null) {
-        _products = current.availablePackages
-            .map((p) => p.storeProduct)
-            .toList();
+  /// 商品情報をリトライ付きで読み込み（iPad初期化遅延対策）
+  Future<void> _loadProductsWithRetry() async {
+    const maxRetries = 3;
+    const retryDelays = [Duration(seconds: 2), Duration(seconds: 4)];
+
+    for (var attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        final offerings = await Purchases.getOfferings()
+            .timeout(const Duration(seconds: 15));
+        final current = offerings.current;
+        if (current != null) {
+          _products = current.availablePackages
+              .map((p) => p.storeProduct)
+              .toList();
+        }
+
+        // Offeringsが空の場合、直接productIDsで取得を試みる
+        if (_products.isEmpty) {
+          _products = await Purchases.getProducts(
+            [AppConfig.weeklyProductId, AppConfig.monthlyProductId],
+          ).timeout(const Duration(seconds: 15));
+        }
+
+        if (_products.isNotEmpty) {
+          _errorMessage = null;
+          notifyListeners();
+          return; // 成功
+        }
+      } catch (e) {
+        debugPrint('❌ 商品情報取得エラー (試行 ${attempt + 1}/${maxRetries + 1}): $e');
       }
 
-      // Offeringsが空の場合、直接productIDsで取得を試みる
-      if (_products.isEmpty) {
-        _products = await Purchases.getProducts(
-          [AppConfig.weeklyProductId, AppConfig.monthlyProductId],
-        );
+      // 最後の試行でなければリトライ待機
+      if (attempt < maxRetries) {
+        final delay = attempt < retryDelays.length
+            ? retryDelays[attempt]
+            : retryDelays.last;
+        await Future.delayed(delay);
       }
-      notifyListeners();
-    } catch (e) {
-      debugPrint('❌ 商品情報取得エラー: $e');
     }
+
+    // 全リトライ失敗
+    debugPrint('⚠️ 商品情報の取得に全て失敗しました');
+  }
+
+  /// 商品情報を読み込み（外部から手動リロード用）
+  Future<void> loadProducts() async {
+    await _loadProductsWithRetry();
   }
 
   /// サブスクリプションを購入

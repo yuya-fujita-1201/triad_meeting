@@ -174,9 +174,9 @@ sleep 5 && bash ~/Projects/ai-director-project/scripts/relay-service.sh logs
 - 価格: 無料
 - 現在のビルド: Build 7 (1.0.0+7)
 - ステータス: **審査待ち**（2026-02-20 再提出）
-- App Store Connect API Key ID: `P26V6QTLTW`
+- App Store Connect API Key ID: `JLULX74QSP`
 - API Issuer ID: `e359cd97-a6d4-4ef9-bcb3-24336fda0e74`
-- .p8キー保存先: `.appstoreconnect/private_keys/AuthKey_P26V6QTLTW.p8`
+- .p8キー保存先: `.appstoreconnect/private_keys/AuthKey_JLULX74QSP.p8`
 
 ---
 

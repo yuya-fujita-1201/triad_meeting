@@ -20,9 +20,9 @@ description: >
 ## 認証情報
 
 ### 必要なもの
-- **API Key ID**: `P26V6QTLTW`
+- **API Key ID**: `JLULX74QSP`
 - **Issuer ID**: `e359cd97-a6d4-4ef9-bcb3-24336fda0e74`
-- **.p8 Private Key**: `.appstoreconnect/private_keys/AuthKey_P26V6QTLTW.p8`
+- **.p8 Private Key**: `.appstoreconnect/private_keys/AuthKey_JLULX74QSP.p8`
 
 ### .p8キーの場所
 プロジェクトルートの `.appstoreconnect/private_keys/` に保存済み。
@@ -36,9 +36,9 @@ description: >
 import jwt
 import time
 
-API_KEY_ID = "P26V6QTLTW"
+API_KEY_ID = "JLULX74QSP"
 ISSUER_ID = "e359cd97-a6d4-4ef9-bcb3-24336fda0e74"
-P8_KEY_PATH = ".appstoreconnect/private_keys/AuthKey_P26V6QTLTW.p8"
+P8_KEY_PATH = ".appstoreconnect/private_keys/AuthKey_JLULX74QSP.p8"
 
 def generate_token():
     with open(P8_KEY_PATH, 'r') as f:

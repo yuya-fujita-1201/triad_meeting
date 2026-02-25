@@ -128,7 +128,7 @@
 - [x] pubspec.yaml バージョン変更: 1.0.0+1 → 1.0.0+7
 - [x] Info.plist: UIInterfaceOrientationPortraitUpsideDown 追加（iPad multitasking要件）
 - [x] flutter build ios --release → Xcode Archive → IPA Export（Mac直接実行）
-- [x] xcrun altool でアップロード（App Store Connect API Key認証: P26V6QTLTW）
+- [x] xcrun altool でアップロード（App Store Connect API Key認証: JLULX74QSP）
 - [x] Build 7 処理完了 → バージョンにBuild 7追加
 - [x] 暗号化コンプライアンス設定（「上記のアルゴリズムのどれでもない」）
 - [x] iPad 13インチスクリーンショット4枚をApp Store Connect API経由でアップロード
@@ -136,8 +136,8 @@
   - ステータス: 「審査待ち」
 
 ### 自動化ノウハウ（2026-02-20 蓄積）
-- App Store Connect API Key: `P26V6QTLTW`、Issuer: `e359cd97-a6d4-4ef9-bcb3-24336fda0e74`
-- .p8キー保存先: `.appstoreconnect/private_keys/AuthKey_P26V6QTLTW.p8`（.gitignore済み）
+- App Store Connect API Key: `JLULX74QSP`、Issuer: `e359cd97-a6d4-4ef9-bcb3-24336fda0e74`
+- .p8キー保存先: `.appstoreconnect/private_keys/AuthKey_JLULX74QSP.p8`（.gitignore済み）
 - スクリーンショットAPI アップロード: JWT生成 → screenshotSet作成 → reserve → upload → commit
 - ExportOptions.plist: `destination: export`（uploadだとAPIキー不在でエラー）
 

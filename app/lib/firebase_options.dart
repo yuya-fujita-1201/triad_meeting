@@ -24,44 +24,52 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
+    apiKey: 'AIzaSyBabtyCa0fIi9bLMQ5mHRI0UMdWeeeMPe8',
+    appId: '1:734293857109:web:placeholder8ed5dc',
+    messagingSenderId: '734293857109',
+    projectId: 'triad-meeting',
+    storageBucket: 'triad-meeting.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_ANDROID_APP_ID',
-    messagingSenderId: 'YOUR_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
+    apiKey: 'AIzaSyBabtyCa0fIi9bLMQ5mHRI0UMdWeeeMPe8',
+    appId: '1:734293857109:android:placeholder8ed5dc',
+    messagingSenderId: '734293857109',
+    projectId: 'triad-meeting',
+    storageBucket: 'triad-meeting.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_IOS_APP_ID',
-    messagingSenderId: 'YOUR_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
+    apiKey: 'AIzaSyBabtyCa0fIi9bLMQ5mHRI0UMdWeeeMPe8',
+    appId: '1:734293857109:ios:31cbff54fa6eb9228ed5dc',
+    messagingSenderId: '734293857109',
+    projectId: 'triad-meeting',
+    storageBucket: 'triad-meeting.firebasestorage.app',
+    iosBundleId: 'com.sankenkaigi.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_MACOS_APP_ID',
-    messagingSenderId: 'YOUR_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
+    apiKey: 'AIzaSyBabtyCa0fIi9bLMQ5mHRI0UMdWeeeMPe8',
+    appId: '1:734293857109:ios:31cbff54fa6eb9228ed5dc',
+    messagingSenderId: '734293857109',
+    projectId: 'triad-meeting',
+    storageBucket: 'triad-meeting.firebasestorage.app',
+    iosBundleId: 'com.sankenkaigi.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_WINDOWS_APP_ID',
-    messagingSenderId: 'YOUR_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
+    apiKey: 'AIzaSyBabtyCa0fIi9bLMQ5mHRI0UMdWeeeMPe8',
+    appId: '1:734293857109:web:placeholder8ed5dc',
+    messagingSenderId: '734293857109',
+    projectId: 'triad-meeting',
+    storageBucket: 'triad-meeting.firebasestorage.app',
   );
 
   static const FirebaseOptions linux = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_LINUX_APP_ID',
-    messagingSenderId: 'YOUR_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
+    apiKey: 'AIzaSyBabtyCa0fIi9bLMQ5mHRI0UMdWeeeMPe8',
+    appId: '1:734293857109:web:placeholder8ed5dc',
+    messagingSenderId: '734293857109',
+    projectId: 'triad-meeting',
+    storageBucket: 'triad-meeting.firebasestorage.app',
   );
 }
