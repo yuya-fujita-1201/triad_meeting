@@ -53,7 +53,7 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
     try {
       final consultation = await api.deliberate(widget.question, isPremium: isPremium);
       await local.saveConsultation(consultation);
-      final count = local.incrementConsultationCount();
+      local.incrementConsultationCount();
       if (!mounted) return;
       setState(() {
         _consultation = consultation;
@@ -61,21 +61,6 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
         _loading = false;
       });
       ref.read(analyticsProvider).logConsultationComplete();
-      if (count == 3 && mounted) {
-        await showDialog<void>(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('登録のおすすめ'),
-            content: const Text('履歴を守るため、次回以降の登録をおすすめします。'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('閉じる'),
-              ),
-            ],
-          ),
-        );
-      }
       _startPlayback();
     } on DailyLimitExceededException catch (error) {
       if (!mounted) return;
@@ -99,6 +84,12 @@ class _DeliberationScreenState extends ConsumerState<DeliberationScreen> {
               : '${error.message}\nリセット: $resetAt';
         });
       }
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _errorMessage = error.message;
+      });
     } catch (_) {
       if (!mounted) return;
       setState(() {

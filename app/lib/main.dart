@@ -16,98 +16,95 @@ import 'services/purchase_service.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
   bool firebaseReady = false;
-  final localStorage = LocalStorageService();
+  await runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    final localStorage = LocalStorageService();
 
-  try {
-    if (Firebase.apps.isEmpty) {
-      // まず options なしで初期化を試みる（iOS: GoogleService-Info.plist、
-      // Android: google-services.json からネイティブ側で自動設定される）
-      try {
-        await Firebase.initializeApp();
-      } catch (_) {
-        // ネイティブ設定ファイルがない場合は Dart 側のオプションで初期化
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
-      }
-    }
-    firebaseReady = true;
-  } on FirebaseException catch (e) {
-    // FirebaseCore が既に初期化済みの場合は duplicate-app が出る可能性があるため継続する
-    if (e.code == 'duplicate-app') {
-      firebaseReady = true;
-    } else {
-      debugPrint('❌ Firebase init failed: $e');
-    }
-  } catch (e) {
-    // ネイティブ側で既に初期化済みの場合でもアプリを起動する
-    debugPrint('❌ Firebase init error: $e');
-    if (Firebase.apps.isNotEmpty) {
-      firebaseReady = true;
-    }
-  }
-
-  if (firebaseReady) {
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
-  }
-
-  try {
-    await MobileAds.instance.initialize();
-  } catch (e) {
-    // 広告SDK初期化失敗時もアプリ起動は継続する
-    debugPrint('❌ AdMob init failed: $e');
-  }
-
-  try {
-    await localStorage.init();
-  } catch (e) {
-    // ローカル保存領域の初期化失敗時は、アプリ起動を止めない
-    debugPrint('❌ LocalStorage init failed: $e');
-  }
-
-  if (firebaseReady) {
     try {
-      await FirebaseAuth.instance.signInAnonymously();
-    } catch (_) {
-      // Continue with limited mode if anonymous sign-in fails
-    }
-  }
-
-  // RevenueCat 初期化
-  final purchaseService = PurchaseService();
-  try {
-    await purchaseService.init();
-  } catch (e) {
-    // 課金SDK初期化失敗時も続行
-    debugPrint('❌ Purchase init failed: $e');
-  }
-
-  runZonedGuarded(
-    () {
-      runApp(
-        ProviderScope(
-          overrides: [
-            localStorageProvider.overrideWithValue(localStorage),
-            purchaseServiceProvider.overrideWith((ref) => purchaseService),
-          ],
-          child: const TriadCouncilApp(),
-        ),
-      );
-    },
-    (error, stack) {
-      if (firebaseReady) {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      } else {
-        debugPrint('🟠 Unhandled app error: $error\n$stack');
+      if (Firebase.apps.isEmpty) {
+        // まず options なしで初期化を試みる（iOS: GoogleService-Info.plist、
+        // Android: google-services.json からネイティブ側で自動設定される）
+        try {
+          await Firebase.initializeApp();
+        } catch (_) {
+          // ネイティブ設定ファイルがない場合は Dart 側のオプションで初期化
+          await Firebase.initializeApp(
+            options: DefaultFirebaseOptions.currentPlatform,
+          );
+        }
       }
-    },
-  );
+      firebaseReady = true;
+    } on FirebaseException catch (e) {
+      // FirebaseCore が既に初期化済みの場合は duplicate-app が出る可能性があるため継続する
+      if (e.code == 'duplicate-app') {
+        firebaseReady = true;
+      } else {
+        debugPrint('❌ Firebase init failed: $e');
+      }
+    } catch (e) {
+      // ネイティブ側で既に初期化済みの場合でもアプリを起動する
+      debugPrint('❌ Firebase init error: $e');
+      if (Firebase.apps.isNotEmpty) {
+        firebaseReady = true;
+      }
+    }
+
+    if (firebaseReady) {
+      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+      PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
+    }
+
+    try {
+      await MobileAds.instance.initialize();
+    } catch (e) {
+      // 広告SDK初期化失敗時もアプリ起動は継続する
+      debugPrint('❌ AdMob init failed: $e');
+    }
+
+    try {
+      await localStorage.init();
+    } catch (e) {
+      // ローカル保存領域の初期化失敗時は、アプリ起動を止めない
+      debugPrint('❌ LocalStorage init failed: $e');
+    }
+
+    if (firebaseReady) {
+      try {
+        await FirebaseAuth.instance.signInAnonymously();
+      } catch (_) {
+        // Continue with limited mode if anonymous sign-in fails
+      }
+    }
+
+    // RevenueCat 初期化
+    final purchaseService = PurchaseService();
+    try {
+      await purchaseService.init();
+    } catch (e) {
+      // 課金SDK初期化失敗時も続行
+      debugPrint('❌ Purchase init failed: $e');
+    }
+
+    runApp(
+      ProviderScope(
+        overrides: [
+          localStorageProvider.overrideWithValue(localStorage),
+          purchaseServiceProvider.overrideWith((ref) => purchaseService),
+        ],
+        child: const TriadCouncilApp(),
+      ),
+    );
+  }, (error, stack) {
+    if (firebaseReady) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    } else {
+      debugPrint('🟠 Unhandled app error: $error\n$stack');
+    }
+  });
 }
 
 class TriadCouncilApp extends ConsumerStatefulWidget {

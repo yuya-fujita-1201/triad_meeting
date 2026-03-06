@@ -35,6 +35,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     FocusScope.of(context).unfocus();
+
+    final localStorage = ref.read(localStorageProvider);
+    if (!localStorage.hasAiConsent) {
+      _showAiConsentDialog(text);
+      return;
+    }
+
+    _navigateToDeliberation(text);
+  }
+
+  void _navigateToDeliberation(String text) {
     ref.read(analyticsProvider).logConsultationStart();
 
     Navigator.of(context).push(
@@ -42,9 +53,89 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         builder: (_) => DeliberationScreen(question: text),
       ),
     ).then((_) {
-      // 審議画面から戻ってきたらテキストをクリア
       _controller.clear();
     });
+  }
+
+  Future<void> _showAiConsentDialog(String text) async {
+    final localStorage = ref.read(localStorageProvider);
+    final agreed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('AIサービスへのデータ送信について'),
+        content: const SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '本アプリは、AI審議機能を提供するために、外部のAIサービスへデータを送信します。\n',
+                style: TextStyle(height: 1.6),
+              ),
+              Text(
+                '送信されるデータ',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '・あなたが入力した相談テキスト\n',
+                style: TextStyle(height: 1.6),
+              ),
+              Text(
+                '送信先',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '・OpenAI, Inc.（米国）のAPIサービス\n',
+                style: TextStyle(height: 1.6),
+              ),
+              Text(
+                '送信の目的',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '・3人のAI賢者（論理・共感・直感）による審議と決議の生成\n',
+                style: TextStyle(height: 1.6),
+              ),
+              Text(
+                'データの取り扱い',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '・氏名やメールアドレスなどの個人情報は送信されません\n'
+                '・送信されたデータはOpenAIにより30日後に削除されます\n'
+                '・データはAIモデルのトレーニングには使用されません\n',
+                style: TextStyle(height: 1.6),
+              ),
+              Text(
+                '詳細はプライバシーポリシーをご覧ください。',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('同意しない'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('同意する'),
+          ),
+        ],
+      ),
+    );
+
+    if (agreed == true) {
+      await localStorage.setAiConsent(true);
+      if (mounted) {
+        _navigateToDeliberation(text);
+      }
+    }
   }
 
   @override

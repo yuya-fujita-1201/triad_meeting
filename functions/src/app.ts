@@ -34,7 +34,6 @@ router.use(verifyFirebaseToken);
 
 const deliberateSchema = z.object({
   consultation: z.string().min(1).max(500),
-  userId: z.string().optional(),
   plan: z.string().optional(),
 });
 
@@ -69,11 +68,8 @@ const sanitizeVote = (vote: string | undefined, questionType: QuestionType): Vot
 router.post('/deliberate', async (req: AuthenticatedRequest, res) => {
   try {
     const body = deliberateSchema.parse(req.body);
-    const userId = req.userId ?? body.userId;
-    logger.info('deliberate_request', { userId, bodyUserId: body.userId, reqUserId: req.userId });
-    if (!userId) {
-      return res.status(400).json({ error: 'Missing userId' });
-    }
+    const userId = req.userId!;
+    logger.info('deliberate_request', { userId });
 
     try {
       await checkAndIncrementDailyUsage(userId);
@@ -261,10 +257,7 @@ function generateDefaultDecision(
 
 router.get('/history', async (req: AuthenticatedRequest, res) => {
   try {
-    const userId = req.userId ?? (req.query.userId as string | undefined);
-    if (!userId) {
-      return res.status(400).json({ error: 'Missing userId' });
-    }
+    const userId = req.userId!;
 
     const rawLimit = Number(req.query.limit ?? 10);
     const rawOffset = Number(req.query.offset ?? 0);
@@ -306,13 +299,9 @@ router.post(
   '/consultations/:id/save',
   async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.userId ?? (req.body.userId as string | undefined);
+      const userId = req.userId!;
       const sourceUserId = req.body.sourceUserId as string | undefined;
       const consultationId = req.params.id;
-
-      if (!userId) {
-        return res.status(400).json({ error: 'Missing userId' });
-      }
 
       let payload = req.body.consultation as Record<string, unknown> | undefined;
 
@@ -350,10 +339,7 @@ router.post(
 
 router.get('/consultations/:id', async (req: AuthenticatedRequest, res) => {
   try {
-    const userId = req.userId ?? (req.query.userId as string | undefined);
-    if (!userId) {
-      return res.status(400).json({ error: 'Missing userId' });
-    }
+    const userId = req.userId!;
 
     const snapshot = await firestore
       .collection('users')
@@ -382,10 +368,7 @@ router.get('/consultations/:id', async (req: AuthenticatedRequest, res) => {
 
 router.delete('/consultations/:id', async (req: AuthenticatedRequest, res) => {
   try {
-    const userId = req.userId ?? (req.query.userId as string | undefined);
-    if (!userId) {
-      return res.status(400).json({ error: 'Missing userId' });
-    }
+    const userId = req.userId!;
 
     await firestore
       .collection('users')

@@ -17,15 +17,36 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   bool _purchasing = false;
 
   Future<void> _purchase(StoreProduct product) async {
+    final purchaseService = ref.read(purchaseServiceProvider);
+    if (!purchaseService.isAvailable) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              purchaseService.errorMessage ?? '課金機能を利用できません。設定をご確認ください。',
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
     setState(() => _purchasing = true);
     try {
-      final purchaseService = ref.read(purchaseServiceProvider);
       final success = await purchaseService.purchase(product);
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('プレミアムプランに加入しました！')),
         );
         Navigator.of(context).pop(true);
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              purchaseService.errorMessage ?? '購入処理を完了できませんでした。',
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _purchasing = false);
@@ -33,9 +54,22 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   }
 
   Future<void> _restore() async {
+    final purchaseService = ref.read(purchaseServiceProvider);
+    if (!purchaseService.isAvailable) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              purchaseService.errorMessage ?? '課金機能を利用できません。設定をご確認ください。',
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
     setState(() => _purchasing = true);
     try {
-      final purchaseService = ref.read(purchaseServiceProvider);
       final success = await purchaseService.restore();
       if (mounted) {
         if (success) {
@@ -54,10 +88,23 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     }
   }
 
+  Future<void> _reloadProducts() async {
+    setState(() => _purchasing = true);
+    try {
+      await ref.read(purchaseServiceProvider).loadProducts();
+    } finally {
+      if (mounted) {
+        setState(() => _purchasing = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final purchaseService = ref.watch(purchaseServiceProvider);
     final products = purchaseService.products;
+    final errorMessage = purchaseService.errorMessage;
+    final isAvailable = purchaseService.isAvailable;
 
     return ConstrainedScaffold(
       title: 'プレミアムプラン',
@@ -126,12 +173,24 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: AppDecorations.parchmentCard(),
-                    child: Text(
-                      'プラン情報を読み込み中...\nしばらくお待ちください。',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textMuted,
-                          ),
-                      textAlign: TextAlign.center,
+                    child: Column(
+                      children: [
+                        Text(
+                          errorMessage ??
+                              (isAvailable
+                                  ? 'プラン情報を取得できませんでした。'
+                                  : '課金機能は現在利用できません。'),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.textMuted,
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          onPressed: isAvailable ? _reloadProducts : null,
+                          child: const Text('再読み込み'),
+                        ),
+                      ],
                     ),
                   ),
                 ] else ...[
@@ -147,18 +206,19 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 const SizedBox(height: 16),
 
                 // 復元ボタン
-                Center(
-                  child: TextButton(
-                    onPressed: _restore,
-                    child: Text(
-                      '購入を復元する',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        decoration: TextDecoration.underline,
+                if (isAvailable)
+                  Center(
+                    child: TextButton(
+                      onPressed: _restore,
+                      child: Text(
+                        '購入を復元する',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                     ),
                   ),
-                ),
 
                 const SizedBox(height: 8),
 

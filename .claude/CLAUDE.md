@@ -201,13 +201,18 @@ sleep 5 && bash ~/Projects/ai-director-project/scripts/relay-service.sh logs
 - Phase 1 コード実装完了（2026-01-24頃 Genspark AI Developer）
 - RevenueCat課金機能実装済み（2026-02-19 Cowork）
 - AdMob本番ID設定済み
-- Build 6 審査リジェクト（Guideline 2.1 — iPadクラッシュ）→ Firebase初期化ガード修正・iPad対応
-- Build 7 再リジェクト（2026-02-20 — Guideline 2.1 iPadクラッシュ再発）
-- **根本原因**: `LSRequiresIPhoneOS=true` と `TARGETED_DEVICE_FAMILY="1,2"` の矛盾
-- **修正済み**（2026-02-23）: LSRequiresIPhoneOS削除、iPad回転設定追加、Riverpod override修正
-- **次のステップ**: Build 8 作成・アップロード・審査再提出（中継サーバー再起動が必要）
+- Build 6/7 審査リジェクト（Guideline 2.1 — iPadクラッシュ）→ 修正済み
+- **Guideline 5.1.1(i)/5.1.2(i) リジェクト対応完了**（2026-03-04 Claude Code）
+  - AI同意ダイアログ（初回審議前）、設定画面トグル、プライバシーポリシー詳細化
+- **認証バイパス修正完了**（2026-03-04 Claude Code）
+  - server/functions の auth.ts を修正、全ルートから userId フォールバック削除
+- **課金サービス安全性強化**（2026-03-04 ユーザー手動修正）
+  - isAvailable ガード、再読み込みボタン、runZonedGuarded ラップ
+- **セキュリティチェック完了**（2026-03-04 Claude Code）
+  - `app-review-rejection-patterns.md` 全チェックリスト監査済み、コードレベル問題なし
+- **次のステップ**: シミュレータテスト → ASCプライバシー宣言確認 → 審査メモ追記 → デプロイ → ビルド＋再提出
 - .p8キーをプロジェクトフォルダに保存済み（`.appstoreconnect/private_keys/`）
-- **未完了**: RevenueCatダッシュボード設定（Phase 2）
+- **未完了**: RevenueCatダッシュボード設定（審査通過後）
 
 ---
 

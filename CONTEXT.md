@@ -1,5 +1,5 @@
 # 三賢会議 (Triad Council) ― コンテキスト引き継ぎドキュメント
-# 最終更新: 2026-02-20 17:00 Cowork — App Store審査再提出完了（Build 7）
+# 最終更新: 2026-03-07 Claude Code — 再審査準備（AI同意撤回トグル追加・メタデータ修正・review_notes強化）
 
 ---
 
@@ -161,16 +161,72 @@
 - [ ] flutter analyze で検証（中継サーバー再起動が必要）
 - [ ] Build 8 作成・アップロード・審査再提出
 
+### Guideline 5.1.1(i)/5.1.2(i) リジェクト対応（2026-03-04 Claude Code）
+- **リジェクト理由**: Guideline 5.1.1(i) / 5.1.2(i) — OpenAI APIへのデータ送信について同意取得・説明が不十分
+- **修正内容**:
+  - [x] `local_storage_service.dart`: AI同意フラグ（`hasAiConsent` / `setAiConsent`）追加
+  - [x] `home_screen.dart`: 審議開始前にAI同意チェック → 未同意なら`_showAiConsentDialog()`表示
+  - [x] `privacy_policy_screen.dart`: セクション3「第三者AIサービスへのデータ送信」に詳細記載（送信先・目的・保持期間・トレーニング利用・同意要件）
+  - [x] `settings_screen.dart`: AIデータ送信トグル（SwitchListTile）追加、「利用状態」表示追加、「アカウント削除」→「利用データを初期化」に改名
+  - [x] `cloudflare-pages/triad-council/privacy/index.html`: Webプライバシーポリシーも同等に更新（HTML table形式）
+
+### 認証バイパス修正（2026-03-04 Claude Code）
+- **問題**: server/functions の auth.ts でトークン無し/不正時に `next()` を呼んでいた（開発用バイパス）
+- **修正内容**:
+  - [x] `server/src/middleware/auth.ts`: 401レスポンスを返すように修正
+  - [x] `functions/src/middleware/auth.ts`: 同上
+  - [x] `server/src/index.ts`: 全ルートから `userId` フォールバック（`req.userId ?? body.userId`）を削除
+  - [x] `functions/src/app.ts`: 同上
+  - [x] `app/lib/services/api_service.dart`: userId送信削除、401エラーハンドリング追加
+  - [x] `app/lib/providers/providers.dart`: ApiServiceコンストラクタ簡素化
+
+### 課金サービス安全性強化（2026-03-04 ユーザー手動修正）
+- [x] `purchase_service.dart`: `isAvailable` フラグ追加、未利用可能時のガード、エラーメッセージ改善
+- [x] `paywall_screen.dart`: `isAvailable` チェック、再読み込みボタン追加、エラー表示改善
+- [x] `main.dart`: `runZonedGuarded` でmain全体をラップ
+- [x] `settings_screen.dart`: アカウント状態表示改善、signOut+再signInフロー追加
+
+### セキュリティチェック（2026-03-04 Claude Code）
+- [x] `app-review-rejection-patterns.md` の全チェックリストに基づく監査完了
+- **結果**: コードレベルの問題なし
+- **ASC手動確認が必要な項目**:
+  - [ ] ASCプライバシー宣言でデータ収集項目（ユーザーコンテンツ、使用状況、クラッシュ、広告）を正しく宣言
+  - [ ] 審査用メモにAI機能・データ共有の説明を記載
+
 ### 審査結果対応
-- [ ] 審査通過 → リリース / 審査リジェクト → 修正対応
+- [ ] シミュレータテスト（iPhone + iPad）
+- [ ] ビルド＋審査再提出
 
 ---
 
+### 再審査準備（2026-03-07 Claude Code）
+- **追加修正**:
+  - [x] `settings_screen.dart`: AI同意撤回トグル（Switch）追加 — Webプライバシーポリシーの「設定画面から撤回可能」と整合
+  - [x] `docs/appstore_metadata.json`: `subtitle_ja` を「3人のAI賢者があなたの悩みを審議」に修正（旧値は別アプリのコピーミス）
+  - [x] `docs/appstore_metadata.json`: `keywords_ja` をアプリ内容に合ったキーワードに修正
+  - [x] `docs/appstore_metadata.json`: `review_notes` をAI機能・同意フロー・データ共有の詳細説明に強化
+  - [x] `docs/appstore_metadata.json`: `collects_data` を `true` に修正（OpenAI APIへのデータ送信あり）
+  - [x] `flutter analyze` クリーン（エラー0件、warning 4件はanalytics_serviceのnon-null assertion）
+
 ## 🔜 次のアクション（優先順）
 
-1. **審査結果を待つ**（Build 7、最大48時間）
-2. **審査結果に応じた対応**
-3. **RevenueCat ダッシュボード設定**（審査通過後）
+### Claude Codeで完了済み
+- [x] settings_screen にAI同意撤回トグル追加
+- [x] appstore_metadata.json 修正（subtitle_ja, keywords_ja, review_notes, collects_data）
+- [x] flutter analyze 確認
+
+### Coworkで実施が必要
+1. **Webプライバシーポリシーのデプロイ**（GitHub push → Cloudflare Pages自動デプロイ）
+2. **ASCプライバシー宣言を更新**（ユーザーコンテンツ「その他のユーザーコンテンツ」を追加宣言）
+3. **ASC審査用メモを更新**（appstore_metadata.json の review_notes を反映）
+4. **ASCサブタイトルを更新**（appstore_metadata.json の subtitle_ja を反映）
+5. **ビルド（Build 8）→ ASCアップロード → ビルド選択 → 暗号化コンプライアンス設定**
+6. **「App Reviewに再提出」ボタンで審査再提出**
+
+### 人間が確認・実施が必要
+- [ ] **Paid Apps Agreement が「有効」ステータスか確認**（ASC → ビジネス → 契約）— SnapEnglishで設定済みなら共通で有効
+- [ ] **RevenueCat Dashboard に ASC API 資格情報が設定されているか確認**（三賢会議のアプリ用）
+- [ ] **REVENUECAT_API_KEY** をビルドコマンドの `--dart-define` に設定
 
 ---
 

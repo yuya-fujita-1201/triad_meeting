@@ -7,6 +7,7 @@ class LocalStorageService {
   static const String _consultationBoxKey = 'consultations';
   static const String _prefsBoxKey = 'prefs';
   static const String _deviceIdKey = 'deviceId';
+  static const String _aiConsentKey = 'aiDataSharingConsent';
 
   late Box<String> _consultationBox;
   late Box _prefsBox;
@@ -57,5 +58,15 @@ class LocalStorageService {
     final next = current + 1;
     _prefsBox.put('consultationCount', next);
     return next;
+  }
+
+  /// AIデータ共有への同意状態を取得
+  bool get hasAiConsent {
+    return _prefsBox.get(_aiConsentKey, defaultValue: false) as bool;
+  }
+
+  /// AIデータ共有への同意を保存
+  Future<void> setAiConsent(bool value) async {
+    await _prefsBox.put(_aiConsentKey, value);
   }
 }

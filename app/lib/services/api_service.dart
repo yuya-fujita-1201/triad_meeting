@@ -4,10 +4,9 @@ import 'package:firebase_core/firebase_core.dart';
 
 import '../config/app_config.dart';
 import '../models/consultation.dart';
-import 'local_storage_service.dart';
 
 class ApiService {
-  ApiService(this._localStorage)
+  ApiService()
       : _dio = Dio(
           BaseOptions(
             baseUrl: '${AppConfig.apiBaseUrl}/v1',
@@ -18,7 +17,7 @@ class ApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final user = _currentUser();
+          final user = await _ensureAuthenticatedUser();
           if (user != null) {
             final token = await user.getIdToken();
             options.headers['Authorization'] = 'Bearer $token';
@@ -30,21 +29,19 @@ class ApiService {
   }
 
   final Dio _dio;
-  final LocalStorageService _localStorage;
 
-  User? _currentUser() {
+  Future<User?> _ensureAuthenticatedUser() async {
     if (Firebase.apps.isEmpty) return null;
-    return FirebaseAuth.instance.currentUser;
-  }
 
-  /// ユーザーIDを取得（Firebase認証済みの場合はuid、未認証の場合はデバイスID）
-  String _getUserId() {
-    final user = _currentUser();
-    if (user != null) {
-      return user.uid;
+    var user = FirebaseAuth.instance.currentUser;
+    if (user != null) return user;
+
+    try {
+      final credential = await FirebaseAuth.instance.signInAnonymously();
+      return credential.user;
+    } catch (_) {
+      return null;
     }
-    // 匿名ユーザーの場合は端末固有のデバイスIDを使用
-    return _localStorage.getDeviceId();
   }
 
   Future<Consultation> deliberate(String consultation, {bool isPremium = false}) async {
@@ -52,7 +49,6 @@ class ApiService {
       final data = <String, dynamic>{
         'consultation': consultation,
         'plan': isPremium ? 'premium' : 'free',
-        'userId': _getUserId(),
       };
       final response = await _dio.post<Map<String, dynamic>>(
         '/deliberate',
@@ -72,6 +68,12 @@ class ApiService {
           resetAt: errorBody['error']?['resetAt']?.toString(),
         );
       }
+      if (error.response?.statusCode == 401) {
+        throw ApiException(
+          401,
+          '認証に失敗しました。アプリを再起動してください。',
+        );
+      }
       throw ApiException(
         error.response?.statusCode,
         error.message ?? '通信エラーが発生しました。',
@@ -84,7 +86,6 @@ class ApiService {
       final params = <String, dynamic>{
         'limit': limit,
         'offset': offset,
-        'userId': _getUserId(),
       };
       final response = await _dio.get<Map<String, dynamic>>(
         '/history',
@@ -106,12 +107,8 @@ class ApiService {
   }
 
   Future<Consultation> fetchConsultation(String id) async {
-    final params = <String, dynamic>{
-      'userId': _getUserId(),
-    };
     final response = await _dio.get<Map<String, dynamic>>(
       '/consultations/$id',
-      queryParameters: params,
     );
     return Consultation.fromJson(response.data ?? {});
   }
@@ -119,7 +116,6 @@ class ApiService {
   Future<void> saveConsultation(Consultation consultation) async {
     final data = <String, dynamic>{
       'consultation': consultation.toJson(),
-      'userId': _getUserId(),
     };
     await _dio.post(
       '/consultations/${consultation.consultationId}/save',
@@ -128,12 +124,8 @@ class ApiService {
   }
 
   Future<void> deleteConsultation(String id) async {
-    final params = <String, dynamic>{
-      'userId': _getUserId(),
-    };
     await _dio.delete(
       '/consultations/$id',
-      queryParameters: params,
     );
   }
 }

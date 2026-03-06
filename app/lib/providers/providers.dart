@@ -16,8 +16,7 @@ final analyticsProvider = Provider<AnalyticsService>((ref) {
 });
 
 final apiServiceProvider = Provider<ApiService>((ref) {
-  final localStorage = ref.read(localStorageProvider);
-  return ApiService(localStorage);
+  return ApiService();
 });
 
 final localStorageProvider = Provider<LocalStorageService>((ref) {

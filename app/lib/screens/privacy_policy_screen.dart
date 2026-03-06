@@ -21,7 +21,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            '最終更新日: 2026年1月31日',
+            '最終更新日: 2026年3月4日',
             style: TextStyle(
               fontSize: 12,
               color: Colors.grey,
@@ -75,7 +75,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           SizedBox(height: 16),
 
           Text(
-            '3. 第三者サービスの利用',
+            '3. 第三者AIサービスへのデータ送信',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -83,8 +83,27 @@ class PrivacyPolicyScreen extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            '【OpenAI API】\n'
-            '審議内容の処理に使用。個人を特定できる情報は送信されません。送信されたデータは30日後に削除されます。\n\n'
+            '【OpenAI API（OpenAI, Inc. 米国）】\n'
+            '本アプリは、AI審議機能を提供するために、ユーザーが入力した相談テキストをOpenAI, Inc.（米国）のAPIサービスに送信します。\n\n'
+            '• 送信されるデータ: ユーザーが入力した相談テキストのみ\n'
+            '• 送信の目的: 3人のAI賢者（論理・共感・直感）による審議と決議の生成\n'
+            '• 送信されないデータ: 氏名、メールアドレス等の個人を特定できる情報\n'
+            '• データ保持: 送信されたデータはOpenAIにより30日後に削除されます\n'
+            '• トレーニング利用: OpenAI APIを通じて送信されたデータはAIモデルのトレーニングには使用されません\n'
+            '• ユーザーの同意: 初回利用時にデータ送信への同意を求めます。同意しない場合、審議機能はご利用いただけません\n'
+            '• OpenAIのプライバシーポリシー: https://openai.com/privacy/\n',
+            style: TextStyle(height: 1.6),
+          ),
+          SizedBox(height: 8),
+          Text(
+            '4. その他の第三者サービス',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
             '【Firebase (Google)】\n'
             '• Firebase Authentication: ユーザー認証\n'
             '• Firebase Analytics: 利用分析\n'
@@ -97,7 +116,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           SizedBox(height: 16),
 
           Text(
-            '4. データの保存と保護',
+            '5. データの保存と保護',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -121,7 +140,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           SizedBox(height: 16),
 
           Text(
-            '5. ユーザーの権利',
+            '6. ユーザーの権利',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -138,7 +157,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           SizedBox(height: 16),
 
           Text(
-            '6. 子供のプライバシー',
+            '7. 子供のプライバシー',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -152,7 +171,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           SizedBox(height: 16),
 
           Text(
-            '7. お問い合わせ',
+            '8. お問い合わせ',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,

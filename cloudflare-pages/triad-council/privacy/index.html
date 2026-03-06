@@ -234,7 +234,7 @@
         <header>
             <h1>プライバシーポリシー</h1>
             <p class="subtitle">三賢会議（Triad Council）</p>
-            <p class="update-date">最終更新日: 2026年1月31日</p>
+            <p class="update-date">最終更新日: 2026年3月4日</p>
         </header>
 
         <div class="section">
@@ -377,22 +377,62 @@
                 </ol>
             </div>
 
-            <h3>3.3 OpenAI API</h3>
+            <h3>3.3 OpenAI API（OpenAI, Inc. 米国）</h3>
 
-            <h4>AI審議機能</h4>
-            <ul>
-                <li><strong>収集する情報:</strong> ユーザーが入力した審議テーマ・相談内容</li>
-                <li><strong>使用目的:</strong> AI賢者による審議の実行</li>
-                <li><strong>プライバシーポリシー:</strong> <a href="https://openai.com/privacy/" target="_blank">openai.com/privacy</a></li>
-                <li><strong>データ保持:</strong> OpenAIのAPIポリシーに準拠（通常30日間でデータ削除）</li>
-            </ul>
+            <h4>AI審議機能 — 第三者AIサービスへのデータ送信</h4>
+            <p>本アプリは、AI審議機能を提供するために、ユーザーが入力したデータを外部のAIサービスに送信します。</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>項目</th>
+                        <th>内容</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>送信先</strong></td>
+                        <td>OpenAI, Inc.（米国）のAPIサービス</td>
+                    </tr>
+                    <tr>
+                        <td><strong>送信されるデータ</strong></td>
+                        <td>ユーザーが入力した相談テキストのみ</td>
+                    </tr>
+                    <tr>
+                        <td><strong>送信の目的</strong></td>
+                        <td>3人のAI賢者（論理・共感・直感）による審議と決議の生成</td>
+                    </tr>
+                    <tr>
+                        <td><strong>送信されないデータ</strong></td>
+                        <td>氏名、メールアドレス、デバイス情報等の個人を特定できる情報</td>
+                    </tr>
+                    <tr>
+                        <td><strong>データ保持期間</strong></td>
+                        <td>OpenAIのAPIポリシーに準拠（30日後に削除）</td>
+                    </tr>
+                    <tr>
+                        <td><strong>トレーニング利用</strong></td>
+                        <td>APIを通じて送信されたデータはAIモデルのトレーニングには使用されません</td>
+                    </tr>
+                    <tr>
+                        <td><strong>プライバシーポリシー</strong></td>
+                        <td><a href="https://openai.com/privacy/" target="_blank">openai.com/privacy</a></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box">
+                <h4>ユーザーの同意</h4>
+                <p>本アプリは、初回利用時にAIサービスへのデータ送信について明示的な同意を求めます。同意いただけない場合、AI審議機能はご利用いただけません。同意はアプリの設定画面からいつでも撤回できます。</p>
+            </div>
 
             <div class="warning-box">
                 <h4>重要な注意事項:</h4>
                 <ul>
                     <li>OpenAIにはユーザー個人を特定できる情報は送信されません</li>
-                    <li>審議内容のみが処理のために送信され、30日後に削除されます</li>
+                    <li>相談テキストのみが処理のために送信され、30日後に削除されます</li>
                     <li>OpenAIは送信されたデータをモデルのトレーニングには使用しません</li>
+                    <li>データは暗号化された通信（HTTPS）を通じて送信されます</li>
                 </ul>
             </div>
         </div>
@@ -591,8 +631,8 @@
         </div>
 
         <footer>
-            <p><strong>最終更新日:</strong> 2026年1月31日</p>
-            <p><strong>バージョン:</strong> 1.0.0</p>
+            <p><strong>最終更新日:</strong> 2026年3月4日</p>
+            <p><strong>バージョン:</strong> 1.1.0</p>
             <p style="margin-top: 20px;">&copy; 2026 三賢会議 (Triad Council). All rights reserved.</p>
             <p style="margin-top: 16px;"><a href="../support/">サポートページ</a> | <a href="https://marumi-works.com/">ホームに戻る</a></p>
         </footer>

@@ -11,18 +11,36 @@ import '../widgets/constrained_scaffold.dart';
 import 'paywall_screen.dart';
 import 'privacy_policy_screen.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
-  Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  String _accountStatusText(User? user) {
+    if (Firebase.apps.isEmpty) {
+      return '認証は現在利用できません。';
+    }
+    if (user == null) {
+      return '未サインイン（通信時に匿名アカウントを自動作成します）';
+    }
+    if (user.isAnonymous) {
+      return '匿名アカウントで利用中（登録不要）';
+    }
+    return '登録アカウントで利用中';
+  }
+
+  Future<void> _resetUsageData(BuildContext context) async {
     final confirmed = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             title: Text(
-              'アカウント削除',
+              '利用データを初期化',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            content: const Text('すべての履歴が削除されます。続行しますか？'),
+            content: const Text('履歴と設定が初期化されます。続行しますか？'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
@@ -36,7 +54,7 @@ class SettingsScreen extends ConsumerWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.accent,
                 ),
-                child: const Text('削除する'),
+                child: const Text('初期化する'),
               ),
             ],
           ),
@@ -78,24 +96,31 @@ class SettingsScreen extends ConsumerWidget {
         try {
           await user.delete();
         } catch (_) {
-          // Ignore if account deletion is not permitted in current auth state.
+          // account deletion が失敗した場合は signOut で状態をリセット
+          try {
+            await FirebaseAuth.instance.signOut();
+          } catch (_) {}
         }
+      }
+      try {
+        await FirebaseAuth.instance.signInAnonymously();
+      } catch (_) {
+        // 初期化直後に通信した際、ApiService側でも匿名サインインを試行する
       }
     }
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('アカウントを削除しました。')),
+        const SnackBar(content: Text('利用データを初期化しました。')),
       );
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final user =
-        Firebase.apps.isNotEmpty ? FirebaseAuth.instance.currentUser : null;
+  Widget build(BuildContext context) {
     final purchaseService = ref.watch(purchaseServiceProvider);
     final isPremium = purchaseService.isPremium;
+    final user = Firebase.apps.isNotEmpty ? FirebaseAuth.instance.currentUser : null;
 
     return ConstrainedScaffold(
       title: '設定',
@@ -158,63 +183,94 @@ class SettingsScreen extends ConsumerWidget {
 
           const SizedBox(height: 8),
 
-          // 購入復元（プレミアムでない場合のみ）
-          if (!isPremium) ...[
-            Container(
-              decoration: AppDecorations.parchmentCard(),
-              child: ListTile(
-                leading: Icon(
-                  Icons.restore,
-                  color: AppColors.secondary,
-                ),
-                title: Text(
-                  '購入を復元',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
-                trailing: Icon(
-                  Icons.chevron_right,
-                  color: AppColors.textMuted,
-                ),
-                onTap: () async {
-                  final success = await purchaseService.restore();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(success
-                            ? '購入を復元しました！'
-                            : '復元可能な購入が見つかりませんでした'),
-                      ),
-                    );
-                  }
-                },
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-
-          // ユーザー情報カード
+          // 利用状態
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
             decoration: AppDecorations.parchmentCard(),
             child: ListTile(
               leading: Icon(
-                Icons.person_outline,
+                Icons.verified_user_outlined,
                 color: AppColors.secondary,
               ),
               title: Text(
-                'ユーザーID',
+                '利用状態',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
               ),
               subtitle: Text(
-                user?.uid ?? '未取得',
+                _accountStatusText(user),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textMuted,
-                      fontStyle: FontStyle.italic,
+                      color: AppColors.textSecondary,
                     ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // AIデータ送信の同意管理
+          Container(
+            decoration: AppDecorations.parchmentCard(),
+            child: ListTile(
+              leading: Icon(
+                Icons.psychology_outlined,
+                color: AppColors.secondary,
+              ),
+              title: Text(
+                'AIデータ送信への同意',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+              ),
+              subtitle: Text(
+                ref.watch(localStorageProvider).hasAiConsent
+                    ? '同意済み - 審議内容をAIサービスに送信します'
+                    : '未同意 - AI審議機能は利用できません',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+              trailing: Switch(
+                value: ref.watch(localStorageProvider).hasAiConsent,
+                activeTrackColor: AppColors.primary,
+                onChanged: (value) async {
+                  if (!value) {
+                    final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: Text(
+                              'AI同意の撤回',
+                              style: Theme.of(ctx).textTheme.titleMedium,
+                            ),
+                            content: const Text(
+                              'AIデータ送信への同意を撤回すると、AI審議機能が利用できなくなります。撤回しますか？',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(false),
+                                child: Text(
+                                  'キャンセル',
+                                  style:
+                                      TextStyle(color: AppColors.textSecondary),
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.of(ctx).pop(true),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.accent,
+                                ),
+                                child: const Text('撤回する'),
+                              ),
+                            ],
+                          ),
+                        ) ??
+                        false;
+                    if (!confirmed) return;
+                  }
+                  await ref.read(localStorageProvider).setAiConsent(value);
+                  setState(() {});
+                },
               ),
             ),
           ),
@@ -247,7 +303,7 @@ class SettingsScreen extends ConsumerWidget {
 
           const SizedBox(height: 8),
 
-          // アカウント削除
+          // 利用データ初期化
           Container(
             decoration: BoxDecoration(
               color: AppColors.card,
@@ -256,11 +312,11 @@ class SettingsScreen extends ConsumerWidget {
             ),
             child: ListTile(
               leading: Icon(
-                Icons.delete_outline,
+                Icons.restart_alt,
                 color: AppColors.accent,
               ),
               title: Text(
-                'アカウント削除',
+                '利用データを初期化',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
                       color: AppColors.accent,
@@ -270,7 +326,7 @@ class SettingsScreen extends ConsumerWidget {
                 Icons.chevron_right,
                 color: AppColors.accent.withOpacity(0.5),
               ),
-              onTap: () => _deleteAccount(context, ref),
+              onTap: () => _resetUsageData(context),
             ),
           ),
 
