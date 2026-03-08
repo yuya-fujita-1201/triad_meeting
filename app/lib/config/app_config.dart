@@ -17,7 +17,7 @@ class AppConfig {
   // RevenueCat
   static const String revenueCatApiKey = String.fromEnvironment(
     'REVENUECAT_API_KEY',
-    defaultValue: '', // RevenueCat ダッシュボードで取得した Apple API Key を設定
+    defaultValue: 'appl_ySxqYIKZDhyWnRhHacgGuzPunGQ', // RevenueCat Apple API Key
   );
 
   // RevenueCat Entitlement ID

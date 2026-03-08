@@ -1,13 +1,22 @@
 import OpenAI from 'openai';
 
-const apiKey = process.env.OPENAI_API_KEY;
-if (!apiKey) {
-  throw new Error('OPENAI_API_KEY is required.');
-}
-
 const model = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
 
-const client = new OpenAI({ apiKey });
+let client: OpenAI | null = null;
+
+function getClient(): OpenAI {
+  if (client) {
+    return client;
+  }
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY is required.');
+  }
+
+  client = new OpenAI({ apiKey });
+  return client;
+}
 
 export type QuestionType = 'yesno' | 'choice' | 'open';
 
@@ -88,7 +97,7 @@ const systemPrompt = `あなたは「三賢会議」のAIです。論理・共�
 export async function generateDeliberation(
   consultation: string,
 ): Promise<DeliberationDraft> {
-  const response = await client.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model,
     temperature: 0.7,
     response_format: { type: 'json_object' },

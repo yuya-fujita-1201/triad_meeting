@@ -30,7 +30,6 @@ const router = express_1.default.Router();
 router.use(auth_1.verifyFirebaseToken);
 const deliberateSchema = zod_1.z.object({
     consultation: zod_1.z.string().min(1).max(500),
-    userId: zod_1.z.string().optional(),
     plan: zod_1.z.string().optional(),
 });
 // 有効な投票値のセット
@@ -61,11 +60,8 @@ const sanitizeVote = (vote, questionType) => {
 router.post('/deliberate', async (req, res) => {
     try {
         const body = deliberateSchema.parse(req.body);
-        const userId = req.userId ?? body.userId;
-        logger.info('deliberate_request', { userId, bodyUserId: body.userId, reqUserId: req.userId });
-        if (!userId) {
-            return res.status(400).json({ error: 'Missing userId' });
-        }
+        const userId = req.userId;
+        logger.info('deliberate_request', { userId });
         try {
             await (0, usage_1.checkAndIncrementDailyUsage)(userId);
         }
@@ -230,10 +226,7 @@ function generateDefaultDecision(questionType, votes, options) {
 }
 router.get('/history', async (req, res) => {
     try {
-        const userId = req.userId ?? req.query.userId;
-        if (!userId) {
-            return res.status(400).json({ error: 'Missing userId' });
-        }
+        const userId = req.userId;
         const rawLimit = Number(req.query.limit ?? 10);
         const rawOffset = Number(req.query.offset ?? 0);
         const limit = Math.min(Math.max(Number.isFinite(rawLimit) ? rawLimit : 10, 1), 50);
@@ -266,12 +259,9 @@ router.get('/history', async (req, res) => {
 });
 router.post('/consultations/:id/save', async (req, res) => {
     try {
-        const userId = req.userId ?? req.body.userId;
+        const userId = req.userId;
         const sourceUserId = req.body.sourceUserId;
         const consultationId = req.params.id;
-        if (!userId) {
-            return res.status(400).json({ error: 'Missing userId' });
-        }
         let payload = req.body.consultation;
         if (!payload && sourceUserId) {
             const sourceSnap = await firebase_1.firestore
@@ -302,10 +292,7 @@ router.post('/consultations/:id/save', async (req, res) => {
 });
 router.get('/consultations/:id', async (req, res) => {
     try {
-        const userId = req.userId ?? req.query.userId;
-        if (!userId) {
-            return res.status(400).json({ error: 'Missing userId' });
-        }
+        const userId = req.userId;
         const snapshot = await firebase_1.firestore
             .collection('users')
             .doc(userId)
@@ -330,10 +317,7 @@ router.get('/consultations/:id', async (req, res) => {
 });
 router.delete('/consultations/:id', async (req, res) => {
     try {
-        const userId = req.userId ?? req.query.userId;
-        if (!userId) {
-            return res.status(400).json({ error: 'Missing userId' });
-        }
+        const userId = req.userId;
         await firebase_1.firestore
             .collection('users')
             .doc(userId)

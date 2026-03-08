@@ -6,9 +6,7 @@ async function verifyFirebaseToken(req, res, next) {
     try {
         const header = req.headers.authorization;
         if (!header || !header.startsWith('Bearer ')) {
-            // For development: allow requests without auth token
-            // Don't set req.userId here - let the route handler use body.userId
-            return next();
+            return res.status(401).json({ error: 'Authentication required' });
         }
         const token = header.replace('Bearer ', '');
         const decoded = await firebase_1.admin.auth().verifyIdToken(token);
@@ -16,9 +14,7 @@ async function verifyFirebaseToken(req, res, next) {
         return next();
     }
     catch (error) {
-        // For development: allow requests even if token verification fails
-        // Don't set req.userId here - let the route handler use body.userId
-        return next();
+        return res.status(401).json({ error: 'Invalid or expired token' });
     }
 }
 //# sourceMappingURL=auth.js.map
